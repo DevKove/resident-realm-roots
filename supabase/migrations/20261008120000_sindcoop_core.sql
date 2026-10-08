@@ -465,18 +465,32 @@ alter table public.assinaturas enable row level security;
 alter table public.configuracoes enable row level security;
 
 create policy profiles_self on public.profiles for select to authenticated using (id=auth.uid() or public.is_platform_admin());
-create policy profiles_update_self on public.profiles for update to authenticated using (id=auth.uid() or public.is_platform_admin()) with check (id=auth.uid() or public.is_platform_admin());
+create policy profiles_update_self on public.profiles for update to authenticated using (id=auth.uid() or public.is_platform_admin());
 create policy plans_read on public.planos for select to authenticated using (ativo or public.is_platform_admin());
 
--- Generic tenant policies. Writes are intentionally restricted to management roles.
-do $$
+-- Tenant-owned tables expose only rows from an authorized condominium.
+do $
 declare t text;
 begin
-  foreach t in array array['condominios','membros_condominio','unidades','moradores','funcionarios','veiculos','animais','avisos','notificacoes','enquetes','enquete_opcoes','enquete_votos','ocorrencias','ocorrencia_historico','ocorrencia_comentarios','areas_comuns','reservas','visitantes','entregas','acessos_portaria','documentos','categorias_financeiras','receitas','despesas','cobrancas','auditoria','assinaturas','configuracoes']
+  foreach t in array array['condominios','membros_condominio','unidades','moradores','funcionarios','veiculos','animais','avisos','enquetes','ocorrencias','areas_comuns','reservas','visitantes','entregas','acessos_portaria','documentos','categorias_financeiras','receitas','despesas','cobrancas','auditoria','assinaturas','configuracoes']
   loop
     execute format('create policy %I_select on public.%I for select to authenticated using (public.is_condo_member(condominio_id))',t,t);
   end loop;
-end $$;
+end $;
+
+-- Child tables derive tenant authorization from their parent row.
+create policy enquete_opcoes_select on public.enquete_opcoes for select to authenticated
+using (exists (select 1 from public.enquetes e where e.id=enquete_id and public.is_condo_member(e.condominio_id)));
+create policy enquete_votos_self on public.enquete_votos for all to authenticated
+using (user_id=auth.uid() and exists (select 1 from public.enquetes e where e.id=enquete_id and public.is_condo_member(e.condominio_id)))
+with check (user_id=auth.uid() and exists (select 1 from public.enquetes e where e.id=enquete_id and public.is_condo_member(e.condominio_id)));
+create policy ocorrencia_historico_select on public.ocorrencia_historico for select to authenticated
+using (exists (select 1 from public.ocorrencias o where o.id=ocorrencia_id and public.is_condo_member(o.condominio_id)));
+create policy ocorrencia_comentarios_select on public.ocorrencia_comentarios for select to authenticated
+using (exists (select 1 from public.ocorrencias o where o.id=ocorrencia_id and public.is_condo_member(o.condominio_id)));
+create policy notificacao_self on public.notificacoes for all to authenticated
+using (user_id=auth.uid() or public.is_platform_admin())
+with check (user_id=auth.uid() or public.is_platform_admin());
 
 create policy condo_insert on public.condominios for insert to authenticated with check (created_by=auth.uid() or public.is_platform_admin());
 create policy condo_update on public.condominios for update to authenticated using (public.has_condo_role(id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(id,array['super_admin','administrador','sindico']::public.app_role[]));
@@ -486,10 +500,22 @@ create policy member_manage on public.membros_condominio for all to authenticate
 create policy tenant_manage on public.unidades for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]));
 create policy resident_manage on public.moradores for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]));
 create policy employee_manage on public.funcionarios for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[]));
-create policy ops_manage on public.ocorrencias for all to authenticated using (public.is_condo_member(condominio_id)) with check (public.is_condo_member(condominio_id));
-create policy reservation_manage on public.reservas for all to authenticated using (public.is_condo_member(condominio_id)) with check (public.is_condo_member(condominio_id));
+create policy occurrence_insert on public.ocorrencias for insert to authenticated
+with check (public.is_condo_member(condominio_id) and autor_id=auth.uid());
+create policy occurrence_update on public.ocorrencias for update to authenticated
+using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]) or autor_id=auth.uid())
+with check (public.is_condo_member(condominio_id));
+create policy occurrence_delete on public.ocorrencias for delete to authenticated
+using (public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[]));
+create policy reservation_insert on public.reservas for insert to authenticated
+with check (public.is_condo_member(condominio_id) and solicitante_id=auth.uid());
+create policy reservation_update on public.reservas for update to authenticated
+using (solicitante_id=auth.uid() or public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]))
+with check (public.is_condo_member(condominio_id));
+create policy reservation_delete on public.reservas for delete to authenticated
+using (solicitante_id=auth.uid() or public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[]));
 create policy notice_manage on public.avisos for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]));
-create policy notification_self on public.notificacoes for all to authenticated using (user_id=auth.uid() or public.is_platform_admin()) with check (user_id=auth.uid() or public.is_platform_admin());
+
 create policy financial_manage on public.receitas for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[]));
 create policy financial_expense_manage on public.despesas for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[]));
 create policy billing_manage on public.cobrancas for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[]));
