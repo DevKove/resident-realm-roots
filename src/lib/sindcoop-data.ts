@@ -57,6 +57,20 @@ export async function createCondominio(input: {nome:string; cidade?:string; esta
   return data as string;
 }
 
+export async function completePendingOnboarding(): Promise<"completed" | "needs_onboarding" | "none"> {
+  const user = await getSessionUser();
+  if (!user) return "none";
+
+  const existing = await getCondoContext();
+  if (existing) return "completed";
+
+  const condoName = String(user.user_metadata?.condo_name ?? "").trim();
+  if (!condoName) return "needs_onboarding";
+
+  await createCondominio({ nome: condoName });
+  return "completed";
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
