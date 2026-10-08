@@ -10,9 +10,12 @@ permissions:
   pages: write
   id-token: write
 
+# Keep Pages deployments serialized, but never cancel a valid build that is
+# already queued/running. This prevents the GitHub Pages environment from
+# repeatedly replacing the deployment with a newer waiting request.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
