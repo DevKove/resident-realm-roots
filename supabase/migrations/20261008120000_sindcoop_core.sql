@@ -472,7 +472,7 @@ create policy plans_read on public.planos for select to authenticated using (ati
 do $$
 declare t text;
 begin
-  foreach t in array array['condominios','membros_condominio','unidades','moradores','funcionarios','veiculos','animais','avisos','enquetes','ocorrencias','areas_comuns','reservas','visitantes','entregas','acessos_portaria','documentos','categorias_financeiras','receitas','despesas','cobrancas','auditoria','assinaturas','configuracoes']
+  foreach t in array array['membros_condominio','unidades','moradores','funcionarios','veiculos','animais','avisos','enquetes','ocorrencias','areas_comuns','reservas','visitantes','entregas','acessos_portaria','documentos','categorias_financeiras','receitas','despesas','cobrancas','auditoria','assinaturas','configuracoes']
   loop
     execute format('create policy %I_select on public.%I for select to authenticated using (public.is_condo_member(condominio_id))',t,t);
   end loop;
