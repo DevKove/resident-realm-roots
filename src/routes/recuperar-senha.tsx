@@ -1,0 +1,12 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { FormEvent, useState } from "react";
+import { Building2, Loader2, MailCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+export const Route = createFileRoute("/recuperar-senha")({ component: RecoveryPage });
+
+function RecoveryPage() {
+  const [email,setEmail]=useState(""); const [busy,setBusy]=useState(false); const [message,setMessage]=useState(""); const [error,setError]=useState("");
+  async function submit(e:FormEvent){e.preventDefault();setBusy(true);setError("");setMessage("");try{const {error:e}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.origin+"/login"});if(e)throw e;setMessage("Se o endereço estiver cadastrado, enviaremos as instruções para redefinir sua senha.");}catch(e){setError("Não foi possível solicitar a recuperação agora.")}finally{setBusy(false)}}
+  return <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6"><form onSubmit={submit} className="w-full max-w-md rounded-3xl border bg-white p-8 shadow-sm"><Link to="/" className="flex items-center gap-3 font-bold"><span className="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white"><Building2 className="h-5 w-5"/></span>SindCoop</Link><h1 className="mt-8 text-2xl font-bold">Recuperar senha</h1><p className="mt-1 text-sm text-slate-500">Informe seu e-mail para receber as instruções.</p><label className="mt-6 grid gap-2 text-sm font-medium">E-mail<input required type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} className="rounded-xl border px-3 py-3"/></label>{message&&<div className="mt-4 flex gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700"><MailCheck className="h-4 w-4 shrink-0"/>{message}</div>}{error&&<div role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>}<button disabled={busy} className="mt-6 flex w-full justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white disabled:opacity-60">{busy&&<Loader2 className="h-4 w-4 animate-spin"/>}Enviar instruções</button><p className="mt-5 text-center text-sm"><Link to="/login" className="font-semibold hover:underline">Voltar ao login</Link></p></form></main>;
+}
