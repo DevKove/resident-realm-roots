@@ -492,11 +492,14 @@ create policy notificacao_self on public.notificacoes for all to authenticated
 using (user_id=auth.uid() or public.is_platform_admin())
 with check (user_id=auth.uid() or public.is_platform_admin());
 
-create policy condo_insert on public.condominios for insert to authenticated with check (created_by=auth.uid() or public.is_platform_admin());
+revoke insert on public.condominios from authenticated;
+create policy condo_insert on public.condominios for insert to authenticated with check (public.is_platform_admin());
 create policy condo_update on public.condominios for update to authenticated using (public.has_condo_role(id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(id,array['super_admin','administrador','sindico']::public.app_role[]));
 create policy condo_delete on public.condominios for delete to authenticated using (public.is_platform_admin());
 
-create policy member_manage on public.membros_condominio for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[]));
+create policy member_manage on public.membros_condominio for all to authenticated
+using (public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[]))
+with check (public.has_condo_role(condominio_id,array['super_admin','administrador']::public.app_role[]) and role <> 'super_admin');
 create policy tenant_manage on public.unidades for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]));
 create policy resident_manage on public.moradores for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]));
 create policy employee_manage on public.funcionarios for all to authenticated using (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[])) with check (public.has_condo_role(condominio_id,array['super_admin','administrador','sindico']::public.app_role[]));
