@@ -56,6 +56,190 @@ drop policy if exists storage_tenant_read on storage.objects;
 create policy storage_tenant_read on storage.objects for select to authenticated
 using (
   bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and split_part(name,'/',1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
+
+drop policy if exists storage_tenant_insert on storage.objects;
+create policy storage_tenant_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and split_part(name,'/',1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and split_part(name,'/',1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+);
+
+drop policy if exists storage_tenant_insert on storage.objects;
+create policy storage_tenant_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+  and octet_length(name) < 500
+);
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+  and octet_length(name) < 500
+);
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+);
+
+drop policy if exists storage_tenant_insert on storage.objects;
+create policy storage_tenant_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+  and octet_length(name) < 500
+);
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+);
+
+drop policy if exists storage_tenant_insert on storage.objects;
+create policy storage_tenant_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+  and octet_length(name) < 500
+);
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
+  and public.is_condo_member((split_part(name,'/',1))::uuid)
+  and octet_length(name) < 500
+);
+
+drop policy if exists storage_tenant_delete on storage.objects;
+create policy storage_tenant_delete on storage.objects for delete to authenticated
+using (
+  bucket_id in ('condominium-assets','documents','occurrence-attachments','resident-files','financial-documents')
+  and public.has_condo_role((split_part(name,'/',1))::uuid,array['super_admin','administrador','sindico']::public.app_role[])
+);
+
+create or replace function public.touch_updated_at()
+returns trigger language plpgsql as $$ begin new.updated_at=now(); return new; end $$;
+
+do $$
+declare t text;
+begin
+ foreach t in array array['profiles','condominios','membros_condominio','unidades','moradores','funcionarios','avisos','ocorrencias','assinaturas']
+ loop
+   execute format('drop trigger if exists %I on public.%I', 'touch_'||t,t);
+   execute format('create trigger %I before update on public.%I for each row execute function public.touch_updated_at()', 'touch_'||t,t);
+ end loop;
+end $$;
+
   and public.is_condo_member((split_part(name,'/',1))::uuid)
 );
 
