@@ -41,7 +41,7 @@ function LoginPage() {
         </div>
         {error && <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
         <button disabled={busy} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white disabled:opacity-60">{busy&&<Loader2 className="h-4 w-4 animate-spin"/>}Entrar</button>
-        <div className="mt-5 flex justify-between text-sm"><Link to="/" className="text-slate-500 hover:underline">Voltar</Link><Link to="/cadastro" className="font-semibold hover:underline">Criar conta</Link></div>
+        <div className="mt-4 text-right"><Link to="/recuperar-senha" className="text-sm font-semibold hover:underline">Esqueci minha senha</Link></div><div className="mt-5 flex justify-between text-sm"><Link to="/" className="text-slate-500 hover:underline">Voltar</Link><Link to="/cadastro" className="font-semibold hover:underline">Criar conta</Link></div>
       </form>
     </section>
   </main>;
