@@ -53,7 +53,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean }) {
         aria-label="Escolher tema do layout"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+        className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
       >
         <span className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: current.swatch }} />
         {!compact && <><Palette className="h-4 w-4" /> Tema</>}
