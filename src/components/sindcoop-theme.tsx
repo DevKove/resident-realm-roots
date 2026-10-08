@@ -47,7 +47,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean }) {
   const current = SINDCOOP_THEMES.find((item) => item.id === theme) ?? SINDCOOP_THEMES[0];
 
   return (
-    <div className="fixed bottom-5 right-5 z-[60]">
+    <div style={{ position: "fixed", right: "20px", bottom: "20px", zIndex: 9999 }} className="sindcoop-theme-floating">
       <button
         type="button"
         aria-label="Escolher tema do layout"
