@@ -1,9 +1,16 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AlertTriangle, Bell, Building2, CalendarDays, FileText, Home, LayoutDashboard, LogOut, Menu, Users, WalletCards, X, UserRound, Car, PawPrint, BriefcaseBusiness, ShieldCheck, Package, ClipboardList, Settings } from "lucide-react";
 import { getCondoContext, dashboardStats, signOut, type CondoContext } from "@/lib/sindcoop-data";
+import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/dashboard")({ component: Dashboard });
+export const Route = createFileRoute("/dashboard")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login" });
+  },
+  component: Dashboard,
+});
 
 const modules = [
   ["condominio","Meu Condomínio",Building2],["unidades","Unidades",Home],["moradores","Moradores",Users],["funcionarios","Funcionários",BriefcaseBusiness],
