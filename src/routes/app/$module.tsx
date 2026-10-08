@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/app/$module")({ component: ModulePage });
 
 const definitions: Record<string,{title:string;table:string;fields:string[];columns:string[]}> = {
-  condominio:{title:"Meu Condomínio",table:"condominios",fields:["nome","cidade","estado","telefone","email"],columns:["nome","cidade","estado","email"]},
+  condominio:{title:"Meu Condomínio",table:"condominios",fields:[],columns:["nome","cidade","estado","email"]},
   unidades:{title:"Unidades",table:"unidades",fields:["numero","bloco","andar","tipo","status"],columns:["numero","bloco","andar","status"]},
   moradores:{title:"Moradores",table:"moradores",fields:["nome","cpf","email","telefone","tipo","status"],columns:["nome","email","telefone","tipo","status"]},
   funcionarios:{title:"Funcionários",table:"funcionarios",fields:["nome","cpf","funcao","telefone","email","status"],columns:["nome","funcao","telefone","status"]},
@@ -30,7 +30,7 @@ const label=(x:string)=>x.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase()
 function ModulePage(){
   const {module}=Route.useParams(); const def=definitions[module]??{title:"Módulo",table:"",fields:[],columns:[]};
   const [ctx,setCtx]=useState<any>(null); const [rows,setRows]=useState<any[]>([]); const [form,setForm]=useState<Record<string,string>>({}); const [query,setQuery]=useState(""); const [error,setError]=useState(""); const [busy,setBusy]=useState(true); const [saving,setSaving]=useState(false); const [open,setOpen]=useState(false);
-  const load=async()=>{if(!ctx||!def.table)return;setBusy(true);setError("");try{let q=(supabase as any).from(def.table).select("*").eq("condominio_id",ctx.id).order("created_at",{ascending:false}).limit(100);const {data,error:e}=await q;if(e)throw e;setRows(data??[]);}catch(e){setError(e instanceof Error?e.message:"Não foi possível carregar os dados.");}finally{setBusy(false)}};
+  const load=async()=>{if(!ctx||!def.table)return;setBusy(true);setError("");try{let q=(supabase as any).from(def.table).select("*");if(def.table==="condominios"){q=q.eq("id",ctx.id).limit(1);}else{q=q.eq("condominio_id",ctx.id).order("created_at",{ascending:false}).limit(100);}const {data,error:e}=await q;if(e)throw e;setRows(data??[]);}catch(e){setError(e instanceof Error?e.message:"Não foi possível carregar os dados.");}finally{setBusy(false)}};
   useEffect(()=>{(async()=>{try{const c=await getCondoContext();setCtx(c);}catch(e){setError("Sessão inválida.")}})()},[]);
   useEffect(()=>{load()},[ctx,module]);
   const filtered=useMemo(()=>rows.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase())),[rows,query]);
