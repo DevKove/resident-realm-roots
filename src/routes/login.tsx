@@ -40,7 +40,8 @@ function LoginPage() {
           setError("Seu e-mail ainda não foi confirmado. Confirme o e-mail enviado para você antes de entrar.");
           return;
         }
-        setError("E-mail ou senha inválidos.");
+        setError("Não foi possível entrar. Se você acabou de criar a conta, confirme primeiro o e-mail recebido. Se já confirmou, confira o e-mail e a senha.");
+        setConfirmationRequired(true);
         return;
       }
       const onboarding = await completePendingOnboarding();
