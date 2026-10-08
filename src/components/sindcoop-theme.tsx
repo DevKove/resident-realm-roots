@@ -1,5 +1,5 @@
 import { Check, Palette } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const SINDCOOP_THEMES = [
   { id: "ocean", name: "Azul Executivo", description: "Institucional e equilibrado", swatch: "#0f5b6b" },
@@ -35,6 +35,26 @@ export function SindCoopThemeInitializer() {
 export function ThemeSelector({ compact = false }: { compact?: boolean }) {
   const [theme, setTheme] = useState<SindCoopTheme>(DEFAULT_THEME);
   const [open, setOpen] = useState(false);
+  const selectorRef = useRef<HTMLDivElement>(null);
+
+  // Compatibilidade com versões antigas em cache: se um bundle anterior
+  // ainda tiver montado o seletor no cabeçalho, mantém somente a instância
+  // global mais recente e oculta qualquer instância antiga.
+  useEffect(() => {
+    const current = selectorRef.current;
+    if (!current) return;
+
+    const selectors = Array.from(document.querySelectorAll<HTMLElement>(".sindcoop-theme-floating"));
+    for (const selector of selectors) {
+      if (selector !== current) {
+        selector.style.display = "none";
+        selector.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    current.style.display = "block";
+    current.removeAttribute("aria-hidden");
+  }, []);
 
   useEffect(() => setTheme(getStoredSindCoopTheme()), []);
 
@@ -47,7 +67,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean }) {
   const current = SINDCOOP_THEMES.find((item) => item.id === theme) ?? SINDCOOP_THEMES[0];
 
   return (
-    <div style={{ position: "fixed", right: "20px", bottom: "20px", zIndex: 9999 }} className="sindcoop-theme-floating">
+    <div ref={selectorRef} style={{ position: "fixed", right: "20px", bottom: "20px", zIndex: 9999 }} className="sindcoop-theme-floating">
       <button
         type="button"
         aria-label="Escolher tema do layout"
