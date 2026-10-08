@@ -47,7 +47,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean }) {
   const current = SINDCOOP_THEMES.find((item) => item.id === theme) ?? SINDCOOP_THEMES[0];
 
   return (
-    <div className="relative">
+    <div className="fixed bottom-5 right-5 z-[60]">
       <button
         type="button"
         aria-label="Escolher tema do layout"
@@ -62,7 +62,7 @@ export function ThemeSelector({ compact = false }: { compact?: boolean }) {
       {open && (
         <>
           <button aria-label="Fechar seletor de tema" className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-2 w-72 rounded-2xl border bg-white p-2 shadow-2xl">
+          <div className="absolute bottom-full right-0 z-50 mb-2 w-72 rounded-2xl border bg-white p-2 shadow-2xl">
             <div className="px-3 py-2">
               <p className="text-sm font-bold text-slate-900">Tema do layout</p>
               <p className="mt-0.5 text-xs text-slate-500">Escolha a aparência do SindCoop.</p>
