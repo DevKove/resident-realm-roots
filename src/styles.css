@@ -157,3 +157,95 @@
   body { background: white; }
   .print-area { box-shadow: none !important; border: none !important; }
 }
+
+
+/* SindCoop selectable layout themes */
+html[data-sindcoop-theme="ocean"] {
+  --sindcoop-bg: #f4f8fa;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #e7f1f4;
+  --sindcoop-primary: #0f5b6b;
+  --sindcoop-primary-strong: #083d49;
+  --sindcoop-text: #17313a;
+  --sindcoop-muted: #60747b;
+  --sindcoop-border: #d7e3e7;
+}
+html[data-sindcoop-theme="forest"] {
+  --sindcoop-bg: #f3f9f6;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #e4f2eb;
+  --sindcoop-primary: #176b4d;
+  --sindcoop-primary-strong: #0d4b36;
+  --sindcoop-text: #19382c;
+  --sindcoop-muted: #61766d;
+  --sindcoop-border: #d6e5dd;
+}
+html[data-sindcoop-theme="royal"] {
+  --sindcoop-bg: #f7f5fc;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #ece8f8;
+  --sindcoop-primary: #4c3b8f;
+  --sindcoop-primary-strong: #35286d;
+  --sindcoop-text: #30264e;
+  --sindcoop-muted: #746c88;
+  --sindcoop-border: #e0dced;
+}
+html[data-sindcoop-theme="graphite"] {
+  --sindcoop-bg: #f4f5f6;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #e7e9ec;
+  --sindcoop-primary: #30343b;
+  --sindcoop-primary-strong: #1e2126;
+  --sindcoop-text: #272a30;
+  --sindcoop-muted: #6d727b;
+  --sindcoop-border: #d9dce1;
+}
+html[data-sindcoop-theme="wine"] {
+  --sindcoop-bg: #fbf5f7;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #f1e1e7;
+  --sindcoop-primary: #7a2848;
+  --sindcoop-primary-strong: #571b32;
+  --sindcoop-text: #452333;
+  --sindcoop-muted: #7b6870;
+  --sindcoop-border: #e8d7de;
+}
+
+html[data-sindcoop-theme] body {
+  background: var(--sindcoop-bg);
+  color: var(--sindcoop-text);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+/* The existing Tailwind utility classes remain intact; these overrides let the selected theme
+   recolor the current SindCoop shell and operational screens without duplicating components. */
+html[data-sindcoop-theme] .bg-slate-50 { background-color: var(--sindcoop-bg) !important; }
+html[data-sindcoop-theme] .bg-white { background-color: var(--sindcoop-surface) !important; }
+html[data-sindcoop-theme] .bg-slate-100 { background-color: var(--sindcoop-soft) !important; }
+html[data-sindcoop-theme] .text-slate-900 { color: var(--sindcoop-text) !important; }
+html[data-sindcoop-theme] .text-slate-600 { color: var(--sindcoop-muted) !important; }
+html[data-sindcoop-theme] .text-slate-500 { color: var(--sindcoop-muted) !important; }
+html[data-sindcoop-theme] .text-slate-400 { color: color-mix(in srgb, var(--sindcoop-muted) 70%, white) !important; }
+html[data-sindcoop-theme] .border { border-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .border-b { border-bottom-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .border-r { border-right-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .border-t { border-top-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .bg-slate-950 { background-color: var(--sindcoop-primary-strong) !important; }
+html[data-sindcoop-theme] .hover\\:bg-slate-100:hover { background-color: var(--sindcoop-soft) !important; }
+html[data-sindcoop-theme] .hover\\:border-slate-300:hover { border-color: var(--sindcoop-primary) !important; }
+html[data-sindcoop-theme] .focus\\:ring-slate-200:focus { --tw-ring-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .bg-red-50 { background-color: color-mix(in srgb, #fee2e2 88%, var(--sindcoop-bg)) !important; }
+html[data-sindcoop-theme] .text-red-700 { color: #b42318 !important; }
+html[data-sindcoop-theme] .bg-emerald-50 { background-color: color-mix(in srgb, #dff7eb 88%, var(--sindcoop-bg)) !important; }
+html[data-sindcoop-theme] .text-emerald-700 { color: #087443 !important; }
+
+html[data-sindcoop-theme] .bg-slate-950:hover { filter: brightness(1.08); }
+html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-border) !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-sindcoop-theme] .bg-white,
+  html[data-sindcoop-theme] .bg-slate-50,
+  html[data-sindcoop-theme] .bg-slate-100 {
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+  }
+}
