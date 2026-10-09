@@ -1,6 +1,31 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Plus, RefreshCw, Search, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  Car,
+  ClipboardList,
+  FileText,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  PawPrint,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings,
+  ShieldCheck,
+  UserRound,
+  Users,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { getCondoContext, type CondoContext } from "@/lib/sindcoop-data";
 import { canAccessModule, canCreateModule, canDeleteModule } from "@/lib/sindcoop-permissions";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,10 +59,32 @@ const definitions: Record<string, ModuleDefinition> = {
   configuracoes: { title: "Configurações", table: "configuracoes", fields: [], columns: ["updated_at"] },
 };
 
+const sideModules = [
+  ["dashboard", "Dashboard", LayoutDashboard],
+  ["condominio", "Meu Condomínio", Building2],
+  ["unidades", "Unidades", Home],
+  ["areas-comuns", "Áreas comuns", CalendarDays],
+  ["moradores", "Moradores", Users],
+  ["funcionarios", "Funcionários", BriefcaseBusiness],
+  ["veiculos", "Veículos", Car],
+  ["animais", "Animais", PawPrint],
+  ["avisos", "Avisos", Bell],
+  ["ocorrencias", "Ocorrências", AlertTriangle],
+  ["reservas", "Reservas", CalendarDays],
+  ["portaria", "Portaria", ShieldCheck],
+  ["visitantes", "Visitantes", UserRound],
+  ["entregas", "Entregas", Package],
+  ["documentos", "Documentos", FileText],
+  ["financeiro", "Financeiro", WalletCards],
+  ["relatorios", "Relatórios", ClipboardList],
+  ["configuracoes", "Configurações", Settings],
+] as const;
+
 const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
 function ModulePage() {
   const { module } = Route.useParams();
+  const navigate = useNavigate();
   const def = definitions[module] ?? { title: "Módulo", table: "", fields: [], columns: [] };
   const [ctx, setCtx] = useState<CondoContext | null>(null);
   const [contextReady, setContextReady] = useState(false);
@@ -49,6 +96,7 @@ function ModulePage() {
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [mobile, setMobile] = useState(false);
 
   const load = async () => {
     if (!contextReady) return;
@@ -194,151 +242,230 @@ function ModulePage() {
     else await load();
   }
 
+  const activeSidebar = module === "dashboard" ? "dashboard" : module;
+
   return (
-    <main className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 sindcoop-page-enter">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-center gap-3">
-          <Link to="/dashboard" className="sindcoop-icon-button rounded-xl border bg-white p-2.5">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-          <div className="flex-1">
-            <p className="text-xs text-slate-400">SindCoop / Operação</p>
-            <h1 className="text-2xl font-bold">{def.title}</h1>
+    <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
+      {mobile && <button aria-label="Fechar menu" onClick={() => setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden" />}
+
+      <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 " + (mobile ? "translate-x-0" : "-translate-x-full")}>
+        <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5">
+          <span className="sindcoop-brand-mark">
+            <img src={new URL("../../IMG/modelo.png", import.meta.url).href} alt="Identidade visual SindCoop" />
+          </span>
+          <div className="min-w-0">
+            <span className="sindcoop-brand-name block truncate">SindCoop</span>
+            <span className="sindcoop-brand-caption block uppercase">Gestão condominial</span>
           </div>
-          {ctx && canCreateModule(ctx.role, module) && def.fields.length > 0 && (
-            <button
-              onClick={() => setOpen(true)}
-              className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
-            >
-              <Plus className="h-4 w-4" />
-              Novo
-            </button>
-          )}
+        </div>
+
+        <div className="border-b p-4">
+          <div className="rounded-xl bg-slate-100 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Condomínio ativo</p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-900">{ctx?.name ?? "Carregando..."}</p>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3">
+          {sideModules.map(([key, labelText, Icon]) => {
+            const isActive = key === activeSidebar;
+            const destination = key === "dashboard" ? "/dashboard" : `/app/${key}`;
+
+            return (
+              <Link
+                key={key}
+                to={destination}
+                className={"sindcoop-nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 " + (isActive ? "bg-slate-100 text-slate-900 shadow-sm" : "hover:bg-slate-100")}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{labelText}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t p-3">
           <button
-            onClick={() => void load()}
-            className="sindcoop-icon-button rounded-xl border bg-white p-2.5"
-            aria-label="Atualizar"
+            onClick={() => {
+              void navigate({ to: "/" });
+            }}
+            className="sindcoop-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100"
           >
-            <RefreshCw className={"h-4 w-4 " + (busy ? "sindcoop-spin" : "")} />
+            <LogOut className="h-4 w-4" />
+            Sair
           </button>
         </div>
+      </aside>
 
-        <div className="sindcoop-fade-in mt-6 flex items-center gap-3 rounded-2xl border bg-white p-3">
-          <Search className="h-4 w-4 text-slate-400" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar neste módulo…"
-            className="w-full bg-transparent text-sm outline-none"
-            aria-label="Buscar neste módulo"
-          />
-        </div>
+      <main className="min-h-screen lg:pl-72">
+        <header className="sticky top-0 z-20 flex h-20 items-center border-b bg-white/95 px-4 backdrop-blur sm:px-6">
+          <button className="sindcoop-icon-button lg:hidden rounded-xl border bg-white p-2.5" onClick={() => setMobile(true)} aria-label="Abrir menu">
+            <Menu className="h-4 w-4" />
+          </button>
 
-        {error && (
-          <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            {busy ? (
-              <div className="p-10 text-center text-sm text-slate-500">
-                <span className="sindcoop-skeleton mx-auto block h-3 w-36 rounded-full" />
-                <span className="mt-3 block">Carregando…</span>
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Link to="/dashboard" className="sindcoop-icon-button rounded-xl border bg-white p-2.5">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">SindCoop / Operação</p>
+                <h1 className="text-xl font-bold text-slate-900">{def.title}</h1>
               </div>
-            ) : filtered.length === 0 ? (
-              <div className="p-12 text-center">
-                <ShieldCheck className="mx-auto h-8 w-8 text-slate-300" />
-                <p className="mt-3 font-semibold">Nenhum registro encontrado</p>
-                <p className="mt-1 text-sm text-slate-500">Os dados exibidos são exclusivamente do condomínio autorizado.</p>
-              </div>
-            ) : (
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="bg-slate-50">
-                  <tr>
-                    {def.columns.map((column) => (
-                      <th key={column} className="px-4 py-3 font-semibold">{label(column)}</th>
-                    ))}
-                    {ctx && canDeleteModule(ctx.role, module) && (
-                      <th className="px-4 py-3" aria-label="Ações" />
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((row) => (
-                    <tr key={row.id} className="border-t">
-                      {def.columns.map((column) => (
-                        <td key={column} className="px-4 py-3">
-                          {typeof row[column] === "boolean" ? (row[column] ? "Sim" : "Não") : row[column] ?? "—"}
-                        </td>
-                      ))}
-                      {ctx && canDeleteModule(ctx.role, module) && (
-                        <td className="px-4 py-3 text-right">
-                          <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">
-                            Excluir
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
+            </div>
 
-        {open && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 sindcoop-fade-in">
-            <form
-              onSubmit={(event) => { event.preventDefault(); void save(); }}
-              className="sindcoop-modal-enter w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
-            >
-              <h2 className="text-xl font-bold">Novo registro — {def.title}</h2>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                {def.fields.map((field) => (
-                  <label key={field} className="grid gap-2 text-sm font-medium">
-                    {label(field)}
-                    {field === "area_id" ? (
-                      <select
-                        required
-                        value={form[field] ?? ""}
-                        onChange={(event) => setForm({ ...form, [field]: event.target.value })}
-                        className="rounded-xl border px-3 py-2.5"
-                      >
-                        <option value="">Selecione uma área comum</option>
-                        {areas.map((area) => <option key={area.id} value={area.id}>{area.nome}</option>)}
-                      </select>
-                    ) : (
-                      <input
-                        required={["nome", "numero", "titulo", "descricao", "categoria", "pessoa", "tipo", "destinatario", "area_id", "inicio", "fim", "valor"].includes(field)}
-                        type={field === "inicio" || field === "fim" ? "datetime-local" : ["valor", "taxa", "capacidade"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
-                        step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
-                        value={form[field] ?? ""}
-                        onChange={(event) => setForm({ ...form, [field]: event.target.value })}
-                        className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200"
-                      />
-                    )}
-                  </label>
-                ))}
-              </div>
-              {module === "reservas" && areas.length === 0 && (
-                <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-                  Nenhuma área comum cadastrada. Cadastre uma área antes de criar reservas.
-                </p>
+            <div className="hidden items-center gap-2 sm:flex">
+              {ctx && canCreateModule(ctx.role, module) && def.fields.length > 0 && (
+                <button
+                  onClick={() => setOpen(true)}
+                  className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo
+                </button>
               )}
-              <div className="mt-6 flex justify-end gap-2">
-                <button type="button" onClick={() => setOpen(false)} className="rounded-xl border px-4 py-2.5 font-semibold">
-                  Cancelar
-                </button>
-                <button disabled={saving} className="rounded-xl bg-slate-950 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
-                  {saving ? "Salvando…" : "Salvar"}
-                </button>
-              </div>
-            </form>
+              <button
+                onClick={() => void load()}
+                className="sindcoop-icon-button rounded-xl border bg-white p-2.5"
+                aria-label="Atualizar"
+              >
+                <RefreshCw className={"h-4 w-4 " + (busy ? "sindcoop-spin" : "")} />
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-    </main>
+        </header>
+
+        <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
+          <div className="sindcoop-fade-in mt-6 flex items-center gap-3 rounded-2xl border bg-white p-3">
+            <Search className="h-4 w-4 text-slate-400" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar neste módulo…"
+              className="w-full bg-transparent text-sm outline-none"
+              aria-label="Buscar neste módulo"
+            />
+          </div>
+
+          {error && (
+            <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              {busy ? (
+                <div className="p-10 text-center text-sm text-slate-500">
+                  <span className="sindcoop-skeleton mx-auto block h-3 w-36 rounded-full" />
+                  <span className="mt-3 block">Carregando…</span>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="p-12 text-center">
+                  <ShieldCheck className="mx-auto h-8 w-8 text-slate-300" />
+                  <p className="mt-3 font-semibold">Nenhum registro encontrado</p>
+                  <p className="mt-1 text-sm text-slate-500">Os dados exibidos são exclusivamente do condomínio autorizado.</p>
+                </div>
+              ) : (
+                <table className="w-full min-w-[720px] text-left text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      {def.columns.map((column) => (
+                        <th key={column} className="px-4 py-3 font-semibold">{label(column)}</th>
+                      ))}
+                      {ctx && canDeleteModule(ctx.role, module) && <th className="px-4 py-3" aria-label="Ações" />}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((row) => (
+                      <tr key={row.id} className="border-t">
+                        {def.columns.map((column) => (
+                          <td key={column} className="px-4 py-3">
+                            {typeof row[column] === "boolean" ? (row[column] ? "Sim" : "Não") : row[column] ?? "—"}
+                          </td>
+                        ))}
+                        {ctx && canDeleteModule(ctx.role, module) && (
+                          <td className="px-4 py-3 text-right">
+                            <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">
+                              Excluir
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+
+          {open && (
+            <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 sindcoop-fade-in">
+              <form
+                onSubmit={(event) => { event.preventDefault(); void save(); }}
+                className="sindcoop-modal-enter w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
+              >
+                <h2 className="text-xl font-bold">Novo registro — {def.title}</h2>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {def.fields.map((field) => (
+                    <label key={field} className="grid gap-2 text-sm font-medium">
+                      {label(field)}
+                      {field === "area_id" ? (
+                        <select
+                          required
+                          value={form[field] ?? ""}
+                          onChange={(event) => setForm({ ...form, [field]: event.target.value })}
+                          className="rounded-xl border px-3 py-2.5"
+                        >
+                          <option value="">Selecione uma área comum</option>
+                          {areas.map((area) => <option key={area.id} value={area.id}>{area.nome}</option>)}
+                        </select>
+                      ) : (
+                        <input
+                          required={[
+                            "nome",
+                            "numero",
+                            "titulo",
+                            "descricao",
+                            "categoria",
+                            "pessoa",
+                            "tipo",
+                            "destinatario",
+                            "area_id",
+                            "inicio",
+                            "fim",
+                            "valor",
+                          ].includes(field)}
+                          type={field === "inicio" || field === "fim" ? "datetime-local" : ["valor", "taxa", "capacidade"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
+                          step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
+                          value={form[field] ?? ""}
+                          onChange={(event) => setForm({ ...form, [field]: event.target.value })}
+                          className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200"
+                        />
+                      )}
+                    </label>
+                  ))}
+                </div>
+                {module === "reservas" && areas.length === 0 && (
+                  <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+                    Nenhuma área comum cadastrada. Cadastre uma área antes de criar reservas.
+                  </p>
+                )}
+                <div className="mt-6 flex justify-end gap-2">
+                  <button type="button" onClick={() => setOpen(false)} className="rounded-xl border px-4 py-2.5 font-semibold">
+                    Cancelar
+                  </button>
+                  <button disabled={saving} className="rounded-xl bg-slate-950 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
+                    {saving ? "Salvando…" : "Salvar"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
+
+export { label };
