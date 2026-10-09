@@ -475,3 +475,133 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
  .sindcoop-dashboard-hero h2,.sindcoop-dashboard-hero p { color:#102b49 !important; }
  .sindcoop-dashboard-hero-art { display:none; }
 }
+
+/* Sistema visual unificado — referência IMG/modelo.png
+   Azul profundo e azul royal representam o mapa/edifícios; dourado é usado como acento.
+   Branco porcelana e superfícies claras preservam contraste e leitura em todas as rotas. */
+:root {
+  --background: #f4f7fb;
+  --foreground: #102b49;
+  --card: #ffffff;
+  --card-foreground: #102b49;
+  --popover: #ffffff;
+  --popover-foreground: #102b49;
+  --primary: #174f85;
+  --primary-foreground: #ffffff;
+  --secondary: #eaf2fb;
+  --secondary-foreground: #123b66;
+  --muted: #edf2f8;
+  --muted-foreground: #62758b;
+  --accent: #f7edda;
+  --accent-foreground: #6b4c12;
+  --border: #dce5ef;
+  --input: #d5dfeb;
+  --ring: #d7ad58;
+  --sidebar: #0b2340;
+  --sidebar-foreground: #f5f8fc;
+  --sidebar-primary: #d7ad58;
+  --sidebar-primary-foreground: #102b49;
+  --sidebar-accent: #123b66;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255,255,255,.13);
+  --sidebar-ring: #d7ad58;
+}
+html[data-sindcoop-theme] {
+  --sindcoop-bg: #f4f7fb;
+  --sindcoop-surface: #ffffff;
+  --sindcoop-soft: #eaf2fb;
+  --sindcoop-primary: #174f85;
+  --sindcoop-primary-strong: #0b2340;
+  --sindcoop-text: #102b49;
+  --sindcoop-muted: #62758b;
+  --sindcoop-border: #dce5ef;
+}
+html[data-sindcoop-theme] body {
+  background-color: #f4f7fb !important;
+  background-image: radial-gradient(ellipse at 94% 0%, rgba(215,173,88,.10), transparent 30%), linear-gradient(180deg,#f8fafd 0%,#f1f5fa 100%) !important;
+  color: #102b49;
+}
+html[data-sindcoop-theme] .sindcoop-visual-shell { background: transparent; }
+html[data-sindcoop-theme] :is(.bg-slate-50,.bg-background) { background-color: #f4f7fb !important; }
+html[data-sindcoop-theme] :is(.bg-white,.bg-card) { background-color: #fff !important; }
+html[data-sindcoop-theme] :is(.bg-slate-100,.bg-secondary,.bg-muted) { background-color: #eaf2fb !important; }
+html[data-sindcoop-theme] :is(.text-slate-950,.text-slate-900,.text-foreground) { color: #102b49 !important; }
+html[data-sindcoop-theme] :is(.text-slate-700,.text-slate-600,.text-slate-500,.text-muted-foreground) { color: #62758b !important; }
+html[data-sindcoop-theme] :is(.border,.border-b,.border-t,.border-l,.border-r) { border-color: #dce5ef !important; }
+html[data-sindcoop-theme] :is(.bg-primary,.bg-slate-900,.bg-slate-950) {
+  background-color: #0b2340 !important;
+  background-image: linear-gradient(135deg,#174f85 0%,#0b2340 100%) !important;
+  color: #fff !important;
+}
+html[data-sindcoop-theme] :is(.text-primary,.text-blue-700,.text-blue-800) { color: #174f85 !important; }
+html[data-sindcoop-theme] :is(.border-primary,.border-blue-500) { border-color: #d7ad58 !important; }
+html[data-sindcoop-theme] :is(button,a,[role="button"]) { transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+html[data-sindcoop-theme] :is(button.bg-primary,a.bg-primary,button.bg-slate-900,a.bg-slate-900,button.bg-slate-950,a.bg-slate-950):hover {
+  filter: brightness(1.08);
+  box-shadow: 0 7px 20px -12px rgba(11,35,64,.75), 0 0 0 1px rgba(215,173,88,.35);
+}
+html[data-sindcoop-theme] :is(input,select,textarea,[role="combobox"]) {
+  border-color: #d5dfeb;
+  background-color: #fff;
+  color: #102b49;
+}
+html[data-sindcoop-theme] :is(input,select,textarea,[role="combobox"]):focus {
+  border-color: #d7ad58 !important;
+  box-shadow: 0 0 0 3px rgba(215,173,88,.18) !important;
+  outline: none;
+}
+html[data-sindcoop-theme] :is(.rounded-xl.border,.rounded-2xl.border,.rounded-3xl.border,.shadow-sm,.shadow-md,.shadow-lg) {
+  box-shadow: 0 10px 28px -24px rgba(11,35,64,.55);
+}
+html[data-sindcoop-theme] :is(.bg-blue-50,.bg-indigo-50) { background-color: #eaf2fb !important; }
+html[data-sindcoop-theme] :is(.text-blue-600,.text-blue-700,.text-indigo-600,.text-indigo-700) { color: #174f85 !important; }
+html[data-sindcoop-theme] :is(.bg-amber-50,.bg-yellow-50) { background-color: #f7edda !important; }
+html[data-sindcoop-theme] :is(.text-amber-600,.text-amber-700,.text-yellow-700) { color: #8a641d !important; }
+html[data-sindcoop-theme] .sindcoop-visual-shell aside {
+  background: linear-gradient(180deg,#fff 0%,#f7faff 100%) !important;
+  border-right-color: #dce5ef !important;
+}
+html[data-sindcoop-theme] .sindcoop-brand::after { background: linear-gradient(90deg,#0b2340,#1f5c91 58%,#d7ad58); }
+html[data-sindcoop-theme] .sindcoop-visual-shell main > header {
+  background: rgba(255,255,255,.94) !important;
+  backdrop-filter: blur(16px);
+}
+html[data-sindcoop-theme] .sindcoop-nav-item[aria-current="page"],
+html[data-sindcoop-theme] .sindcoop-nav-item.active {
+  color: #102b49 !important;
+  background: #eaf2fb !important;
+  border-color: #dce5ef !important;
+  box-shadow: inset 3px 0 0 #d7ad58;
+}
+html[data-sindcoop-theme] .sindcoop-nav-item:hover {
+  color: #102b49 !important;
+  background: #edf3fa !important;
+  border-color: #dce5ef !important;
+}
+html[data-sindcoop-theme] .sindcoop-stat-card::before { background: linear-gradient(90deg,#174f85,#d7ad58); }
+html[data-sindcoop-theme] :is(.sindcoop-stat-icon,.sindcoop-action-card .sindcoop-action-icon) {
+  color: #174f85 !important;
+  background: #eaf2fb !important;
+  border-color: #dce5ef !important;
+}
+html[data-sindcoop-theme] :is(.sindcoop-stat-card,.sindcoop-action-card):hover {
+  border-color: rgba(215,173,88,.7) !important;
+}
+html[data-sindcoop-theme] .sindcoop-visual-shell::before { opacity: .045; }
+@media (max-width: 640px) {
+  html[data-sindcoop-theme] .sindcoop-visual-shell::before { opacity: .025; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-sindcoop-theme] *, html[data-sindcoop-theme] *::before, html[data-sindcoop-theme] *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media print {
+  html[data-sindcoop-theme] body,
+  html[data-sindcoop-theme] .sindcoop-visual-shell { background: #fff !important; background-image: none !important; }
+  html[data-sindcoop-theme] :is(.bg-primary,.bg-slate-900,.bg-slate-950) { background: #fff !important; color: #102b49 !important; }
+  .sindcoop-visual-shell::before { display: none !important; }
+}
