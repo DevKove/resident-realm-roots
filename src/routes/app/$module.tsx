@@ -273,18 +273,20 @@ function ModulePage() {
         payload.conteudo = payload.conteudo || payload.titulo || "";
       }
       if (def.table === "ocorrencias") {
-        payload.autor_id = userId;
-        payload.status = "open";
+        if (!editingId) {
+          payload.autor_id = userId;
+          payload.status = "open";
+        }
       }
-      if (def.table === "reservas") {
+      if (def.table === "reservas" && !editingId) {
         payload.solicitante_id = userId;
         payload.status = "pending";
       }
-      if (def.table === "acessos_portaria") {
+      if (def.table === "acessos_portaria" && !editingId) {
         payload.operador_id = userId;
         payload.entrada = new Date().toISOString();
       }
-      if (def.table === "entregas") {
+      if (def.table === "entregas" && !editingId) {
         payload.responsavel_id = userId;
         payload.recebido_em = new Date().toISOString();
         payload.status = "waiting_pickup";
