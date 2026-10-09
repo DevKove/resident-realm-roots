@@ -409,7 +409,7 @@ function ModulePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
+              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "sub_sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
                   onClick={() => {
                     setEditingId(null);
