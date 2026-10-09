@@ -84,6 +84,34 @@ const sideModules = [
 
 const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
+const FIELD_MAX_LENGTHS: Record<string, number> = {
+  "condominio.nome": 200, "condominio.cnpj": 18, "condominio.endereco": 250,
+  "condominio.numero": 30, "condominio.complemento": 100, "condominio.bairro": 100,
+  "condominio.cep": 9, "condominio.cidade": 100, "condominio.telefone": 20,
+  "condominio.email": 254, "condominio.descricao": 5000,
+  "unidades.numero": 30, "unidades.bloco": 50, "unidades.andar": 30,
+  "unidades.tipo": 50, "unidades.observacoes": 1000,
+  "moradores.nome": 150, "moradores.cpf": 14, "moradores.email": 254, "moradores.telefone": 20,
+  "funcionarios.nome": 150, "funcionarios.cpf": 14, "funcionarios.funcao": 100,
+  "funcionarios.telefone": 20, "funcionarios.email": 254, "funcionarios.observacoes": 1000,
+  "veiculos.placa": 10, "veiculos.marca_modelo": 100, "veiculos.cor": 50,
+  "veiculos.vaga": 50, "veiculos.observacoes": 1000,
+  "animais.nome": 100, "animais.especie": 100, "animais.raca": 100,
+  "animais.porte": 20, "animais.observacoes": 1000,
+  "avisos.titulo": 200, "avisos.conteudo": 5000,
+  "ocorrencias.titulo": 200, "ocorrencias.descricao": 5000, "ocorrencias.categoria": 100,
+  "reservas.observacoes": 1000,
+  "portaria.pessoa": 150, "portaria.tipo": 50, "portaria.observacoes": 1000,
+  "visitantes.nome": 150, "visitantes.documento": 50, "visitantes.observacoes": 1000,
+  "entregas.destinatario": 150, "entregas.transportadora": 150, "entregas.descricao": 1000,
+  "documentos.categoria": 100, "documentos.titulo": 200,
+  "financeiro.descricao": 300, "financeiro.fornecedor": 200, "financeiro.observacoes": 1000,
+};
+
+function fieldMaxLength(module: string, field: string): number | undefined {
+  return FIELD_MAX_LENGTHS[`${module}.${field}`];
+}
+
 function fieldOptions(module: string, field: string): Array<[string, string]> | null {
   if (["ativo", "fixado", "autorizado"].includes(field)) return [["true", "Sim"], ["false", "Não"]];
   if (field === "prioridade") return [["low", "Baixa"], ["medium", "Média"], ["high", "Alta"], ["critical", "Crítica"]];
@@ -611,7 +639,7 @@ function ModulePage() {
                           {fieldOptions(module, field)!.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
                         </select>
                       ) : ["conteudo", "descricao", "observacoes", "regras", "regras_reservas", "notificacoes", "financeiro"].includes(field) ? (
-                        <textarea rows={["regras_reservas", "notificacoes", "financeiro"].includes(field) ? 7 : 3} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
+                        <textarea rows={["regras_reservas", "notificacoes", "financeiro"].includes(field) ? 7 : 3} maxLength={fieldMaxLength(module, field)} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
                       ) : (
                         <input
                           required={[
@@ -629,7 +657,9 @@ function ModulePage() {
                             "valor",
                           ].includes(field)}
                           type={field === "inicio" || field === "fim" ? "datetime-local" : ["data_nascimento", "data_admissao", "vencimento", "pagamento"].includes(field) ? "date" : ["valor", "taxa", "capacidade", "area", "fracao_ideal", "quantidade_unidades", "blocos", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
-                          step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
+                          step={field === "capacidade" ? "1" : ["valor", "taxa", "area", "fracao_ideal"].includes(field) ? "0.01" : undefined}
+                          min={["blocos", "capacidade"].includes(field) ? "1" : ["valor", "taxa", "area", "fracao_ideal", "quantidade_unidades", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field) ? "0" : undefined}
+                          maxLength={fieldMaxLength(module, field)}
                           value={form[field] ?? ""}
                           onChange={(event) => setForm({ ...form, [field]: event.target.value })}
                           className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200"
@@ -651,7 +681,7 @@ function ModulePage() {
                     Logotipo / foto do condomínio
                     {logoUrl && <img src={logoUrl} alt="Prévia do logotipo atual" className="h-24 w-24 rounded-xl border object-cover" />}
                     <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
-                    <span className="text-xs font-normal text-slate-500">Formatos: PNG, JPG, WEBP ou SVG. O arquivo será armazenado no espaço privado do condomínio.</span>
+                    <span className="text-xs font-normal text-slate-500">Formatos: PNG, JPG ou WEBP. O arquivo será armazenado no espaço privado do condomínio.</span>
                   </div>
                 )}
                 {module === "reservas" && areas.length === 0 && (
