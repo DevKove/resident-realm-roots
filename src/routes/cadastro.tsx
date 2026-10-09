@@ -24,7 +24,7 @@ function CadastroPage() {
         password,
         options:{
           data:{full_name:name.trim(), condo_name:condo.trim()},
-          emailRedirectTo:window.location.origin + "/login",
+          emailRedirectTo: new URL(import.meta.env.BASE_URL + "login", window.location.origin).toString(),
         },
       });
       if(a) throw a;
