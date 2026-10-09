@@ -217,7 +217,7 @@ function ModulePage() {
     const isDocuments = module === "documentos";
     const canManageProfile = ["super_admin", "administrador", "sindico"].includes(ctx?.role ?? "");
     const canManageSettings = ["super_admin", "administrador"].includes(ctx?.role ?? "");
-    const canManageDocuments = ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx?.role ?? "");
+    const canManageDocuments = ["super_admin", "administrador", "sindico", "sub_sindico", "funcionario"].includes(ctx?.role ?? "");
     if (!ctx || (!def.fields.length && !isCondoProfile) || (isCondoProfile ? !canManageProfile : isSettings ? !canManageSettings : isDocuments ? !canManageDocuments : !canCreateModule(ctx.role, module))) return;
     if (module === "reservas" && areas.length === 0) {
       setError("Cadastre uma área comum antes de solicitar uma reserva.");
