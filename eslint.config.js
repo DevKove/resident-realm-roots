@@ -15,6 +15,7 @@ export default tseslint.config(
       globals: globals.browser,
     },
     plugins: {
+      "@typescript-eslint": tseslint.plugin,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
     },
@@ -40,6 +41,7 @@ export default tseslint.config(
   {
     // Formatting is handled explicitly by `npm run format`; the existing codebase
     // contains legacy formatting debt that should not block functional lint checks.
+    plugins: { "@typescript-eslint": tseslint.plugin },
     rules: {
       "prettier/prettier": "off",
       "@typescript-eslint/no-explicit-any": "warn",
