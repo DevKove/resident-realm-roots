@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import modeloUrl from "../../IMG/modelo.png?url";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -24,7 +25,6 @@ import {
   UserRound,
   Users,
   WalletCards,
-  X,
 } from "lucide-react";
 import { getCondoContext, type CondoContext } from "@/lib/sindcoop-data";
 import { canAccessModule, canCreateModule, canDeleteModule } from "@/lib/sindcoop-permissions";
@@ -242,16 +242,22 @@ function ModulePage() {
     else await load();
   }
 
-  const activeSidebar = module === "dashboard" ? "dashboard" : module;
+  async function logout() {
+    const { signOut } = await import("@/lib/sindcoop-data");
+    await signOut();
+    await navigate({ to: "/" });
+  }
+
+  const activeSidebar = module;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
+    <div className="sindcoop-shell">
       {mobile && <button aria-label="Fechar menu" onClick={() => setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden" />}
 
-      <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 " + (mobile ? "translate-x-0" : "-translate-x-full")}>
+      <aside className={`sindcoop-sidebar ${mobile ? "is-open" : ""}`}>
         <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5">
           <span className="sindcoop-brand-mark">
-            <img src={new URL("../../IMG/modelo.png", import.meta.url).href} alt="Identidade visual SindCoop" />
+            <img src={modeloUrl} alt="Identidade visual SindCoop" />
           </span>
           <div className="min-w-0">
             <span className="sindcoop-brand-name block truncate">SindCoop</span>
@@ -275,7 +281,7 @@ function ModulePage() {
               <Link
                 key={key}
                 to={destination}
-                className={"sindcoop-nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 " + (isActive ? "bg-slate-100 text-slate-900 shadow-sm" : "hover:bg-slate-100")}
+                className={`sindcoop-nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 ${isActive ? "bg-slate-100 text-slate-900 shadow-sm" : "hover:bg-slate-100"}`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{labelText}</span>
@@ -286,9 +292,7 @@ function ModulePage() {
 
         <div className="border-t p-3">
           <button
-            onClick={() => {
-              void navigate({ to: "/" });
-            }}
+            onClick={logout}
             className="sindcoop-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100"
           >
             <LogOut className="h-4 w-4" />
@@ -297,7 +301,7 @@ function ModulePage() {
         </div>
       </aside>
 
-      <main className="min-h-screen lg:pl-72">
+      <main className="sindcoop-main">
         <header className="sticky top-0 z-20 flex h-20 items-center border-b bg-white/95 px-4 backdrop-blur sm:px-6">
           <button className="sindcoop-icon-button lg:hidden rounded-xl border bg-white p-2.5" onClick={() => setMobile(true)} aria-label="Abrir menu">
             <Menu className="h-4 w-4" />
@@ -329,7 +333,7 @@ function ModulePage() {
                 className="sindcoop-icon-button rounded-xl border bg-white p-2.5"
                 aria-label="Atualizar"
               >
-                <RefreshCw className={"h-4 w-4 " + (busy ? "sindcoop-spin" : "")} />
+                <RefreshCw className={`h-4 w-4 ${busy ? "sindcoop-spin" : ""}`} />
               </button>
             </div>
           </div>
