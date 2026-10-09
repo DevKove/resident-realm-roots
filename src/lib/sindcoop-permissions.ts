@@ -1,6 +1,7 @@
 export const MODULE_ROLES: Record<string, readonly string[]> = {
   condominio: ["super_admin", "administrador", "sindico", "sub_sindico", "morador", "funcionario", "porteiro"],
   unidades: ["super_admin", "administrador", "sindico", "sub_sindico", "morador", "funcionario", "porteiro"],
+  "areas-comuns": ["super_admin", "administrador", "sindico", "sub_sindico", "morador", "funcionario", "porteiro"],
   moradores: ["super_admin", "administrador", "sindico", "sub_sindico", "morador"],
   funcionarios: ["super_admin", "administrador", "sindico"],
   veiculos: ["super_admin", "administrador", "sindico", "sub_sindico", "morador", "porteiro"],
@@ -18,6 +19,7 @@ export const MODULE_ROLES: Record<string, readonly string[]> = {
 };
 
 const CREATE_ROLES: Record<string, readonly string[]> = {
+  "areas-comuns": ["super_admin", "administrador", "sindico", "sub_sindico"],
   unidades: ["super_admin", "administrador", "sindico", "sub_sindico"],
   moradores: ["super_admin", "administrador", "sindico", "sub_sindico"],
   funcionarios: ["super_admin", "administrador", "sindico"],
@@ -33,6 +35,7 @@ const CREATE_ROLES: Record<string, readonly string[]> = {
 };
 
 const DELETE_ROLES: Record<string, readonly string[]> = {
+  "areas-comuns": ["super_admin", "administrador", "sindico", "sub_sindico"],
   unidades: ["super_admin", "administrador", "sindico", "sub_sindico"],
   moradores: ["super_admin", "administrador", "sindico", "sub_sindico"],
   funcionarios: ["super_admin", "administrador", "sindico"],
