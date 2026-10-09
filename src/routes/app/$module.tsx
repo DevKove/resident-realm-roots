@@ -29,7 +29,7 @@ import {
 import { getCondoContext, type CondoContext } from "@/lib/sindcoop-data";
 import { canAccessModule, canCreateModule, canDeleteModule } from "@/lib/sindcoop-permissions";
 import { supabase } from "@/integrations/supabase/client";
-import { getDocumentStorageBucket, isFinancialDocumentCategory } from "@/lib/sindcoop-document-storage";
+import { getDocumentStorageBucket } from "@/lib/sindcoop-document-storage";
 
 export const Route = createFileRoute("/app/$module")({ component: ModulePage });
 
