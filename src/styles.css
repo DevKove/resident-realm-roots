@@ -158,67 +158,66 @@
   .print-area { box-shadow: none !important; border: none !important; }
 }
 
+:root {
+  --sidebar-width: 18rem;
+  --sidebar-width-mobile: 17rem;
+}
 
-/* SindCoop selectable layout themes */
-html[data-sindcoop-theme="ocean"] {
-  --sindcoop-bg: #f4f8fa;
-  --sindcoop-surface: #ffffff;
-  --sindcoop-soft: #e7f1f4;
-  --sindcoop-primary: #0f5b6b;
-  --sindcoop-primary-strong: #083d49;
-  --sindcoop-text: #17313a;
-  --sindcoop-muted: #60747b;
-  --sindcoop-border: #d7e3e7;
+.sindcoop-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
 }
-html[data-sindcoop-theme="forest"] {
-  --sindcoop-bg: #f3f9f6;
-  --sindcoop-surface: #ffffff;
-  --sindcoop-soft: #e4f2eb;
-  --sindcoop-primary: #176b4d;
-  --sindcoop-primary-strong: #0d4b36;
-  --sindcoop-text: #19382c;
-  --sindcoop-muted: #61766d;
-  --sindcoop-border: #d6e5dd;
+
+.sindcoop-sidebar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  z-index: 40;
+  transform: translateX(0);
 }
-html[data-sindcoop-theme="royal"] {
-  --sindcoop-bg: #f7f5fc;
-  --sindcoop-surface: #ffffff;
-  --sindcoop-soft: #ece8f8;
-  --sindcoop-primary: #4c3b8f;
-  --sindcoop-primary-strong: #35286d;
-  --sindcoop-text: #30264e;
-  --sindcoop-muted: #746c88;
-  --sindcoop-border: #e0dced;
+
+.sindcoop-main {
+  flex: 1;
+  min-width: 0;
+  width: calc(100% - var(--sidebar-width));
 }
-html[data-sindcoop-theme="graphite"] {
-  --sindcoop-bg: #f4f5f6;
-  --sindcoop-surface: #ffffff;
-  --sindcoop-soft: #e7e9ec;
-  --sindcoop-primary: #30343b;
-  --sindcoop-primary-strong: #1e2126;
-  --sindcoop-text: #272a30;
-  --sindcoop-muted: #6d727b;
-  --sindcoop-border: #d9dce1;
-}
-html[data-sindcoop-theme="wine"] {
-  --sindcoop-bg: #fbf5f7;
-  --sindcoop-surface: #ffffff;
-  --sindcoop-soft: #f1e1e7;
-  --sindcoop-primary: #7a2848;
-  --sindcoop-primary-strong: #571b32;
-  --sindcoop-text: #452333;
-  --sindcoop-muted: #7b6870;
-  --sindcoop-border: #e8d7de;
+
+@media (max-width: 1024px) {
+  .sindcoop-shell {
+    display: block;
+  }
+
+  .sindcoop-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width-mobile);
+    height: 100vh;
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    z-index: 40;
+  }
+
+  .sindcoop-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sindcoop-main {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 html[data-sindcoop-theme] body {
   background: var(--sindcoop-bg);
   color: var(--sindcoop-text);
-  transition: background-color .2s ease, color .2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* The existing Tailwind utility classes remain intact; these overrides let the selected theme
-   recolor the current SindCoop shell and operational screens without duplicating components. */
 html[data-sindcoop-theme] .bg-slate-50 { background-color: var(--sindcoop-bg) !important; }
 html[data-sindcoop-theme] .bg-white { background-color: var(--sindcoop-surface) !important; }
 html[data-sindcoop-theme] .bg-slate-100 { background-color: var(--sindcoop-soft) !important; }
@@ -231,9 +230,9 @@ html[data-sindcoop-theme] .border-b { border-bottom-color: var(--sindcoop-border
 html[data-sindcoop-theme] .border-r { border-right-color: var(--sindcoop-border) !important; }
 html[data-sindcoop-theme] .border-t { border-top-color: var(--sindcoop-border) !important; }
 html[data-sindcoop-theme] .bg-slate-950 { background-color: var(--sindcoop-primary-strong) !important; }
-html[data-sindcoop-theme] .hover\\:bg-slate-100:hover { background-color: var(--sindcoop-soft) !important; }
-html[data-sindcoop-theme] .hover\\:border-slate-300:hover { border-color: var(--sindcoop-primary) !important; }
-html[data-sindcoop-theme] .focus\\:ring-slate-200:focus { --tw-ring-color: var(--sindcoop-border) !important; }
+html[data-sindcoop-theme] .hover\:bg-slate-100:hover { background-color: var(--sindcoop-soft) !important; }
+html[data-sindcoop-theme] .hover\:border-slate-300:hover { border-color: var(--sindcoop-primary) !important; }
+html[data-sindcoop-theme] .focus\:ring-slate-200:focus { --tw-ring-color: var(--sindcoop-border) !important; }
 html[data-sindcoop-theme] .bg-red-50 { background-color: color-mix(in srgb, #fee2e2 88%, var(--sindcoop-bg)) !important; }
 html[data-sindcoop-theme] .text-red-700 { color: #b42318 !important; }
 html[data-sindcoop-theme] .bg-emerald-50 { background-color: color-mix(in srgb, #dff7eb 88%, var(--sindcoop-bg)) !important; }
@@ -250,8 +249,6 @@ html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-bord
   }
 }
 
-
-/* SindCoop motion system — subtle, professional and accessibility-aware */
 @keyframes sindcoop-fade-up {
   from { opacity: 0; transform: translate3d(0, 12px, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -293,7 +290,7 @@ html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-bord
 .sindcoop-stat-icon { transition: transform .25s cubic-bezier(.22,1,.36,1); }
 .sindcoop-stat-card:hover .sindcoop-stat-icon { transform: scale(1.08) rotate(-3deg); }
 .sindcoop-skeleton {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 25%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 35%, white) 50%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 75%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 25%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 35%, white) 50%, color-mix(in srgb, var(--s[...]) 75%, white) 75%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 20%, white) 100%);
   background-size: 700px 100%;
   animation: sindcoop-shimmer 1.4s infinite linear;
 }
@@ -309,8 +306,6 @@ html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-bord
   .sindcoop-nav-item, .sindcoop-stat-card, .sindcoop-stat-icon, .sindcoop-icon-button, .sindcoop-action-card, .sindcoop-action-card .sindcoop-action-icon { transition: none !important; }
 }
 
-
-/* SindCoop visual identity inspired by IMG/modelo.png: architectural blue, white and gold. */
 .sindcoop-visual-shell {
   position: relative;
   isolation: isolate;
@@ -404,19 +399,6 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
   html[data-sindcoop-theme] body { background: #fff !important; background-image: none !important; }
 }
 
-
-/* SindCoop brand system — architectural blue, porcelain white and restrained gold. */
-:root {
-  --sc-ink: #102b49;
-  --sc-navy: #0b2340;
-  --sc-navy-2: #123b66;
-  --sc-blue: #1f5c91;
-  --sc-blue-light: #eaf2fb;
-  --sc-gold: #d7ad58;
-  --sc-gold-light: #f7edda;
-  --sc-paper: #f3f6fa;
-  --sc-border: #dce5ef;
-}
 .sindcoop-visual-shell { min-height: 100vh; background: var(--sc-paper); }
 .sindcoop-visual-shell::before { top: 7rem; right: 2rem; width: min(32vw, 420px); opacity: .035; }
 .sindcoop-visual-shell .sindcoop-dashboard-content { max-width: 1680px; margin-inline: auto; }
@@ -427,7 +409,7 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
 }
 .sindcoop-brand { position: relative; min-height: 96px !important; border-bottom-color: #e4ebf3 !important; }
 .sindcoop-brand::after { content:""; position:absolute; left:0; right:0; bottom:-1px; height:3px; background:linear-gradient(90deg,var(--sc-navy),var(--sc-blue) 62%,var(--sc-gold)); }
-.sindcoop-brand-mark { display:grid; place-items:center; width:54px; height:54px; flex:none; overflow:hidden; border-radius:16px; background:linear-gradient(145deg,#eef4fb,#fff); border:1px solid #dce6f1; box-shadow:0 7px 18px -12px rgba(11,35,64,.6); }
+.sindcoop-brand-mark { display:grid; place-items:center; width:54px; height:54px; flex:none; overflow:hidden; border-radius:16px; background:linear-gradient(145deg,#eef4fb,#fff); border:1px solid #dfeaf7; }
 .sindcoop-brand-mark img { width:100%; height:100%; object-fit:contain; padding:2px; }
 .sindcoop-brand-name { display:block; color:var(--sc-ink); font-family:var(--font-display); font-size:1.25rem; font-weight:800; letter-spacing:-.045em; }
 .sindcoop-brand-caption { margin-top:3px; color:#75869a; font-size:9px; font-weight:800; letter-spacing:.16em; }
@@ -438,8 +420,8 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
 .sindcoop-visual-shell aside .sindcoop-nav-item:hover { background:#edf3fa !important; color:var(--sc-ink) !important; border-color:#dce6f0; box-shadow:inset 3px 0 0 var(--sc-gold); }
 .sindcoop-visual-shell main > header { height:78px; background:rgba(255,255,255,.92) !important; border-bottom-color:#dfe7f0 !important; box-shadow:0 8px 24px -25px rgba(10,35,64,.5); }
 .sindcoop-visual-shell main > header h1 { color:var(--sc-ink); font-size:1.12rem; letter-spacing:-.025em; }
-.sindcoop-dashboard-hero { position:relative; isolation:isolate; display:flex; min-height:245px; align-items:center; overflow:hidden; border-radius:24px; padding:clamp(24px,4vw,42px); color:#fff; background:radial-gradient(ellipse at 82% 10%,rgba(215,173,88,.22),transparent 34%),linear-gradient(120deg,#0a213c 0%,#123b66 60%,#1d5688 100%); box-shadow:0 22px 46px -34px rgba(8,29,53,.85); }
-.sindcoop-dashboard-hero::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(7,25,45,.08),transparent 65%),repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 1px,transparent 1px 18px); }
+.sindcoop-dashboard-hero { position:relative; isolation:isolate; display:flex; min-height:245px; align-items:center; overflow:hidden; border-radius:24px; padding:clamp(24px,4vw,42px); color:#fff; }
+.sindcoop-dashboard-hero::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,rgba(7,25,45,.08),transparent 65%),repeating-linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.04) 4px,transparent 4px,transparent 10px); }
 .sindcoop-dashboard-hero-copy { position:relative; z-index:2; max-width:68%; }
 .sindcoop-eyebrow { display:inline-flex; align-items:center; gap:9px; color:#f0d59a; font-size:10px; font-weight:800; letter-spacing:.2em; }
 .sindcoop-eyebrow::before { content:""; width:22px; height:2px; background:var(--sc-gold); }
@@ -448,8 +430,8 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
 .sindcoop-dashboard-hero-art::before { content:""; position:absolute; inset:10%; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.15),rgba(255,255,255,0) 68%); }
 .sindcoop-dashboard-hero-art img { position:relative; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 18px 25px rgba(0,0,0,.2)); }
 .sindcoop-hero-goldline { position:absolute; left:0; bottom:0; width:42%; height:4px; background:linear-gradient(90deg,var(--sc-gold),rgba(215,173,88,0)); }
-.sindcoop-visual-shell .sindcoop-stat-card { position:relative; overflow:hidden; min-height:178px; padding:22px !important; border:1px solid #e0e8f1 !important; border-radius:18px !important; background:linear-gradient(155deg,#fff 0%,#fbfcfe 100%) !important; box-shadow:0 10px 24px -24px rgba(10,35,64,.8) !important; }
-.sindcoop-visual-shell .sindcoop-stat-card::before { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--sc-blue),var(--sc-gold)); opacity:.85; }
+.sindcoop-visual-shell .sindcoop-stat-card { position:relative; overflow:hidden; min-height:178px; padding:22px !important; border:1px solid #e0e8f1 !important; border-radius:18px !important; background:rgba(255,255,255,.98) !important; }
+.sindcoop-visual-shell .sindcoop-stat-card::before { content:""; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,var(--sc-blue),var(--sc-gold)); opacity:.9; }
 .sindcoop-stat-topline { display:flex; align-items:center; justify-content:space-between; }
 .sindcoop-stat-icon { color:var(--sc-blue); background:var(--sc-blue-light) !important; border:1px solid #dce8f6; }
 .sindcoop-stat-dot { width:7px; height:7px; border-radius:50%; background:var(--sc-gold); box-shadow:0 0 0 4px var(--sc-gold-light); }
@@ -461,24 +443,21 @@ html[data-sindcoop-theme] :is(.border, .border-b, .border-t, .border-r) {
 .sindcoop-visual-shell .sindcoop-dashboard-content section h3 { color:var(--sc-ink); }
 .sindcoop-visual-shell .sindcoop-dashboard-content section.mt-6.rounded-2xl { border-radius:17px !important; border-color:#dce6f0 !important; background:linear-gradient(115deg,#fff,#f7faff) !important; }
 @media(max-width:760px) {
- .sindcoop-dashboard-hero { min-height:230px; }
- .sindcoop-dashboard-hero-copy { max-width:100%; }
- .sindcoop-dashboard-hero-art { right:-34px; top:auto; bottom:-38px; width:180px; transform:none; opacity:.24; }
- .sindcoop-dashboard-hero-copy h2 { font-size:1.9rem; }
- .sindcoop-visual-shell::before { opacity:.02; }
+  .sindcoop-dashboard-hero { min-height:230px; }
+  .sindcoop-dashboard-hero-copy { max-width:100%; }
+  .sindcoop-dashboard-hero-art { right:-34px; top:auto; bottom:-38px; width:180px; transform:none; opacity:.24; }
+  .sindcoop-dashboard-hero-copy h2 { font-size:1.9rem; }
+  .sindcoop-visual-shell::before { opacity:.02; }
 }
 @media(prefers-reduced-motion:reduce) {
- .sindcoop-visual-shell * { scroll-behavior:auto !important; }
+  .sindcoop-visual-shell * { scroll-behavior:auto !important; }
 }
 @media print {
- .sindcoop-dashboard-hero { color:#102b49 !important; background:#fff !important; box-shadow:none !important; border:1px solid #dce5ef; }
- .sindcoop-dashboard-hero h2,.sindcoop-dashboard-hero p { color:#102b49 !important; }
- .sindcoop-dashboard-hero-art { display:none; }
+  .sindcoop-dashboard-hero { color:#102b49 !important; background:#fff !important; box-shadow:none !important; border:1px solid #dce5ef; }
+  .sindcoop-dashboard-hero h2,.sindcoop-dashboard-hero p { color:#102b49 !important; }
+  .sindcoop-dashboard-hero-art { display:none; }
 }
 
-/* Sistema visual unificado — referência IMG/modelo.png
-   Azul profundo e azul royal representam o mapa/edifícios; dourado é usado como acento.
-   Branco porcelana e superfícies claras preservam contraste e leitura em todas as rotas. */
 :root {
   --background: #f4f7fb;
   --foreground: #102b49;
