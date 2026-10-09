@@ -24,7 +24,7 @@ function CadastroPage() {
         email:email.trim(),
         password,
         options:{
-          data:{full_name:name.trim(), condo_name:condo.trim()},
+          data:{full_name:name.trim(), condo_name:condo.trim(), terms_accepted:acceptedPolicies, terms_version:"2026-10-09", privacy_notice_version:"2026-10-09", legal_consent_recorded_at:new Date().toISOString()},
           emailRedirectTo: new URL(import.meta.env.BASE_URL + "login", window.location.origin).toString(),
         },
       });
