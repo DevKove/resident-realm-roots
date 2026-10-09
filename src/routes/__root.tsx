@@ -24,6 +24,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      {
+        httpEquiv: "Content-Security-Policy",
+        content: "default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://zjmheonvtxiepuhtnjkr.supabase.co; connect-src 'self' https://zjmheonvtxiepuhtnjkr.supabase.co wss://zjmheonvtxiepuhtnjkr.supabase.co; font-src 'self' data:; upgrade-insecure-requests",
+      },
+      { name: "referrer", content: "strict-origin-when-cross-origin" },
       { title: "SindCoop | Gestão condominial" },
       { name: "description", content: "Gestão condominial simplificada para síndicos, administradores e moradores." },
       { name: "author", content: "SindCoop" },
