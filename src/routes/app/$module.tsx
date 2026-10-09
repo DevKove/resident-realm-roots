@@ -80,7 +80,27 @@ const sideModules = [
   ["configuracoes", "Configurações", Settings],
 ] as const;
 
-const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+const label = (value: string) => value.replaceAll("_", " ").replace(/\\b\\w/g, (char) => char.toUpperCase());
+
+function fieldOptions(module: string, field: string): Array<[string, string]> | null {
+  if (["ativo", "fixado", "autorizado"].includes(field)) return [["true", "Sim"], ["false", "Não"]];
+  if (field === "prioridade") return [["low", "Baixa"], ["medium", "Média"], ["high", "Alta"], ["critical", "Crítica"]];
+  if (field === "status") {
+    if (module === "unidades") return [["occupied", "Ocupada"], ["empty", "Vazia"], ["rented", "Alugada"], ["maintenance", "Em manutenção"]];
+    if (["moradores", "funcionarios"].includes(module)) return [["active", "Ativo"], ["inactive", "Inativo"], ["pending", "Pendente"]];
+    if (module === "ocorrencias") return [["open", "Aberta"], ["analyzing", "Em análise"], ["in_progress", "Em andamento"], ["resolved", "Resolvida"], ["canceled", "Cancelada"]];
+    if (module === "reservas") return [["pending", "Pendente"], ["approved", "Aprovada"], ["rejected", "Recusada"], ["canceled", "Cancelada"]];
+    if (module === "entregas") return [["waiting_pickup", "Aguardando retirada"], ["delivered", "Entregue"], ["returned", "Devolvida"]];
+    if (module === "financeiro") return [["pending", "Pendente"], ["paid", "Pago"], ["overdue", "Vencido"], ["canceled", "Cancelado"]];
+  }
+  if (field === "tipo") {
+    if (module === "moradores") return [["owner", "Proprietário"], ["tenant", "Inquilino"], ["family", "Familiar"], ["other", "Outro"]];
+    if (module === "portaria") return [["visitante", "Visitante"], ["prestador", "Prestador de serviço"], ["funcionario", "Funcionário"], ["morador", "Morador"], ["entrega", "Entrega"]];
+    if (module === "veiculos") return [["carro", "Carro"], ["moto", "Moto"], ["bicicleta", "Bicicleta"], ["outro", "Outro"]];
+  }
+  if (field === "porte") return [["pequeno", "Pequeno"], ["medio", "Médio"], ["grande", "Grande"]];
+  return null;
+}
 
 function ModulePage() {
   const { module } = Route.useParams();
@@ -403,6 +423,38 @@ function ModulePage() {
             </div>
           )}
 
+          {module === "condominio" && rows[0] && (
+            <section className="mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
+              <div className="bg-gradient-to-r from-slate-950 to-slate-700 p-6 text-white sm:p-8">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10">
+                    {logoUrl ? <img src={logoUrl} alt="Logotipo do condomínio" className="h-full w-full object-cover" /> : <Building2 className="h-10 w-10 text-white/80" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Perfil do condomínio</p>
+                    <h2 className="mt-2 text-2xl font-bold">{rows[0].nome}</h2>
+                    <p className="mt-1 text-sm text-slate-300">{[rows[0].endereco, rows[0].numero, rows[0].bairro, rows[0].cidade, rows[0].estado].filter(Boolean).join(", ") || "Endereço ainda não informado"}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-xs text-slate-300">Unidades</p><p className="mt-1 text-2xl font-bold">{rows[0].quantidade_unidades ?? 0}</p></div>
+                </div>
+              </div>
+              <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                {[["CNPJ", rows[0].cnpj], ["Telefone", rows[0].telefone], ["E-mail", rows[0].email], ["CEP", rows[0].cep], ["Blocos", rows[0].blocos], ["Complemento", rows[0].complemento], ["Descrição", rows[0].descricao]].map(([title, value]) => (
+                  <div key={title} className="border-b p-5 sm:border-r"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</p><p className="mt-2 break-words text-sm font-medium text-slate-800">{value || "Não informado"}</p></div>
+                ))}
+              </div>
+            </section>
+          )}
+          {module !== "condominio" && !busy && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                { label: "Registros totais", value: rows.length },
+                { label: "Resultados da busca", value: filtered.length },
+                { label: "Ativos / em andamento", value: rows.filter((row) => ["active", "open", "analyzing", "in_progress", "pending", "waiting_pickup", "approved"].includes(String(row.status ?? "").toLowerCase())).length },
+                { label: "Último registro", value: rows[0]?.updated_at ? new Date(rows[0].updated_at).toLocaleDateString("pt-BR") : rows[0]?.created_at ? new Date(rows[0].created_at).toLocaleDateString("pt-BR") : "—" },
+              ].map((item) => <div key={item.label} className="rounded-2xl border bg-white p-4 shadow-sm"><p className="text-xs font-medium text-slate-500">{item.label}</p><p className="mt-2 text-2xl font-bold text-slate-900">{item.value}</p></div>)}
+            </div>
+          )}
           <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
             <div className="overflow-x-auto">
               {busy ? (
@@ -423,7 +475,7 @@ function ModulePage() {
                       {def.columns.map((column) => (
                         <th key={column} className="px-4 py-3 font-semibold">{label(column)}</th>
                       ))}
-                      {ctx && canDeleteModule(ctx.role, module) && <th className="px-4 py-3" aria-label="Ações" />}
+                      {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && <th className="px-4 py-3 text-right" aria-label="Ações">Ações</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -434,11 +486,10 @@ function ModulePage() {
                             {typeof row[column] === "boolean" ? (row[column] ? "Sim" : "Não") : row[column] ?? "—"}
                           </td>
                         ))}
-                        {ctx && canDeleteModule(ctx.role, module) && (
-                          <td className="px-4 py-3 text-right">
-                            <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">
-                              Excluir
-                            </button>
+                        {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && (
+                          <td className="space-x-3 whitespace-nowrap px-4 py-3 text-right">
+                            {canCreateModule(ctx.role, module) && def.fields.length > 0 && <button onClick={() => { setEditingId(row.id); setForm(Object.fromEntries(def.fields.map((field) => [field, row[field] == null ? "" : String(row[field])]))); setOpen(true); }} className="text-xs font-semibold text-slate-700 hover:underline">Editar</button>}
+                            {canDeleteModule(ctx.role, module) && <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">Excluir</button>}
                           </td>
                         )}
                       </tr>
@@ -455,21 +506,24 @@ function ModulePage() {
                 onSubmit={(event) => { event.preventDefault(); void save(); }}
                 className="sindcoop-modal-enter w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
               >
-                <h2 className="text-xl font-bold">Novo registro — {def.title}</h2>
+                <h2 className="text-xl font-bold">{module === "condominio" ? "Editar cadastro do condomínio" : editingId ? `Editar registro — ${def.title}` : `Novo registro — ${def.title}`}</h2>
+                {module === "condominio" && <p className="mt-2 text-sm text-slate-500">Atualize os dados cadastrais, contatos e a identificação visual do condomínio.</p>}
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   {def.fields.map((field) => (
                     <label key={field} className="grid gap-2 text-sm font-medium">
                       {label(field)}
                       {field === "area_id" ? (
-                        <select
-                          required
-                          value={form[field] ?? ""}
-                          onChange={(event) => setForm({ ...form, [field]: event.target.value })}
-                          className="rounded-xl border px-3 py-2.5"
-                        >
+                        <select required value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5">
                           <option value="">Selecione uma área comum</option>
                           {areas.map((area) => <option key={area.id} value={area.id}>{area.nome}</option>)}
                         </select>
+                      ) : fieldOptions(module, field) ? (
+                        <select value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5">
+                          <option value="">Selecione...</option>
+                          {fieldOptions(module, field)!.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+                        </select>
+                      ) : ["conteudo", "descricao", "observacoes", "regras"].includes(field) ? (
+                        <textarea rows={3} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
                       ) : (
                         <input
                           required={[
@@ -486,7 +540,7 @@ function ModulePage() {
                             "fim",
                             "valor",
                           ].includes(field)}
-                          type={field === "inicio" || field === "fim" ? "datetime-local" : ["valor", "taxa", "capacidade"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
+                          type={field === "inicio" || field === "fim" ? "datetime-local" : ["data_nascimento", "data_admissao", "vencimento", "pagamento"].includes(field) ? "date" : ["valor", "taxa", "capacidade", "area", "fracao_ideal", "quantidade_unidades", "blocos", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
                           step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
                           value={form[field] ?? ""}
                           onChange={(event) => setForm({ ...form, [field]: event.target.value })}
@@ -496,6 +550,14 @@ function ModulePage() {
                     </label>
                   ))}
                 </div>
+                {module === "condominio" && (
+                  <div className="mt-4 grid gap-2 text-sm font-medium">
+                    Logotipo / foto do condomínio
+                    {logoUrl && <img src={logoUrl} alt="Prévia do logotipo atual" className="h-24 w-24 rounded-xl border object-cover" />}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <span className="text-xs font-normal text-slate-500">Formatos: PNG, JPG, WEBP ou SVG. O arquivo será armazenado no espaço privado do condomínio.</span>
+                  </div>
+                )}
                 {module === "reservas" && areas.length === 0 && (
                   <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
                     Nenhuma área comum cadastrada. Cadastre uma área antes de criar reservas.
@@ -506,7 +568,7 @@ function ModulePage() {
                     Cancelar
                   </button>
                   <button disabled={saving} className="rounded-xl bg-slate-950 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
-                    {saving ? "Salvando…" : "Salvar"}
+                    {saving ? "Salvando…" : module === "condominio" || editingId ? "Salvar alterações" : "Salvar registro"}
                   </button>
                 </div>
               </form>
