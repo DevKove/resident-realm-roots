@@ -29,6 +29,7 @@ import {
 import { getCondoContext, type CondoContext } from "@/lib/sindcoop-data";
 import { canAccessModule, canCreateModule, canDeleteModule } from "@/lib/sindcoop-permissions";
 import { supabase } from "@/integrations/supabase/client";
+import { getDocumentStorageBucket } from "@/lib/sindcoop-document-storage";
 
 export const Route = createFileRoute("/app/$module")({ component: ModulePage });
 
@@ -259,8 +260,9 @@ function ModulePage() {
         if (!editingId && !documentFile) throw new Error("Selecione um arquivo para anexar ao documento.");
         if (documentFile) {
           const safeName = documentFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+          const storageBucket = getDocumentStorageBucket(String(payload.categoria ?? form.categoria ?? ""));
           const storagePath = ctx.id + "/documentos/" + Date.now() + "-" + safeName;
-          const { error: uploadError } = await db.storage.from("documents").upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type || "application/octet-stream" });
+          const { error: uploadError } = await db.storage.from(storageBucket).upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type || "application/octet-stream" });
           if (uploadError) throw uploadError;
           payload.storage_path = storagePath;
           payload.mime_type = documentFile.type || "application/octet-stream";
@@ -407,7 +409,7 @@ function ModulePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
+              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "sub_sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
                   onClick={() => {
                     setEditingId(null);
@@ -594,7 +596,7 @@ function ModulePage() {
                   <div className="mt-4 grid gap-2 text-sm font-medium">
                     Arquivo para anexar
                     <input type="file" onChange={(event) => setDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
-                    <span className="text-xs font-normal text-slate-500">O arquivo será armazenado de forma privada e vinculado ao condomínio ativo.</span>
+                    <span className="text-xs font-normal text-slate-500">O arquivo será armazenado de forma privada e vinculado ao condomínio ativo. Para arquivos financeiros, use uma categoria como “Financeiro”, “Prestação de contas”, “Comprovante”, “Boleto” ou “Nota fiscal”; esses arquivos ficam em um espaço restrito à gestão.</span>
                   </div>
                 )}
                 {module === "condominio" && (
