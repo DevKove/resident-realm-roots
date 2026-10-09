@@ -9,13 +9,10 @@ on public.documentos
 for select
 to authenticated
 using (
-  public.is_condo_member(condominio_id)
+  private.is_condo_member(condominio_id)
   and (
     lower(categoria) !~ '(finance|prestação de contas|prestacao de contas|comprovante|pagamento|nota fiscal|receita|despesa|boleto|balancete|orçamento|orcamento|cobrança|cobranca|fatura)'
-    or public.has_condo_role(
-      condominio_id,
-      array['super_admin','administrador','sindico']::public.app_role[]
-    )
+    or private.has_condo_role(condominio_id, array['super_admin','administrador','sindico']::public.app_role[])
   )
 );
 
@@ -25,16 +22,10 @@ on public.documentos
 for insert
 to authenticated
 with check (
-  public.has_condo_role(
-    condominio_id,
-    array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[]
-  )
+  private.has_condo_role(condominio_id, array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[])
   and (
     lower(categoria) !~ '(finance|prestação de contas|prestacao de contas|comprovante|pagamento|nota fiscal|receita|despesa|boleto|balancete|orçamento|orcamento|cobrança|cobranca|fatura)'
-    or public.has_condo_role(
-      condominio_id,
-      array['super_admin','administrador','sindico']::public.app_role[]
-    )
+    or private.has_condo_role(condominio_id, array['super_admin','administrador','sindico']::public.app_role[])
   )
 );
 
@@ -44,29 +35,17 @@ on public.documentos
 for update
 to authenticated
 using (
-  public.has_condo_role(
-    condominio_id,
-    array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[]
-  )
+  private.has_condo_role(condominio_id, array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[])
   and (
     lower(categoria) !~ '(finance|prestação de contas|prestacao de contas|comprovante|pagamento|nota fiscal|receita|despesa|boleto|balancete|orçamento|orcamento|cobrança|cobranca|fatura)'
-    or public.has_condo_role(
-      condominio_id,
-      array['super_admin','administrador','sindico']::public.app_role[]
-    )
+    or private.has_condo_role(condominio_id, array['super_admin','administrador','sindico']::public.app_role[])
   )
 )
 with check (
-  public.has_condo_role(
-    condominio_id,
-    array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[]
-  )
+  private.has_condo_role(condominio_id, array['super_admin','administrador','sindico','sub_sindico','funcionario']::public.app_role[])
   and (
     lower(categoria) !~ '(finance|prestação de contas|prestacao de contas|comprovante|pagamento|nota fiscal|receita|despesa|boleto|balancete|orçamento|orcamento|cobrança|cobranca|fatura)'
-    or public.has_condo_role(
-      condominio_id,
-      array['super_admin','administrador','sindico']::public.app_role[]
-    )
+    or private.has_condo_role(condominio_id, array['super_admin','administrador','sindico']::public.app_role[])
   )
 );
 
@@ -76,8 +55,5 @@ on public.documentos
 for delete
 to authenticated
 using (
-  public.has_condo_role(
-    condominio_id,
-    array['super_admin','administrador','sindico']::public.app_role[]
-  )
+  private.has_condo_role(condominio_id, array['super_admin','administrador','sindico']::public.app_role[])
 );
