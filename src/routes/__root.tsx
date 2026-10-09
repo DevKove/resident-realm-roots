@@ -2,6 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, type ErrorComponentProps } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
+import faviconIcoUrl from "../../IMG/favicon.ico?url";
+import faviconPngUrl from "../../IMG/favicon.png?url";
+import appIconUrl from "../../IMG/icon.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SindCoopThemeInitializer, ThemeSelector } from "../components/sindcoop-theme";
 
@@ -31,9 +34,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: import.meta.env.BASE_URL + "favicon.png", type: "image/png", sizes: "32x32" },
-      { rel: "shortcut icon", href: import.meta.env.BASE_URL + "favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: import.meta.env.BASE_URL + "icon.png" },
+      { rel: "icon", href: faviconIcoUrl, type: "image/x-icon" },
+      { rel: "icon", href: faviconPngUrl, type: "image/png", sizes: "32x32" },
+      { rel: "shortcut icon", href: faviconIcoUrl, type: "image/x-icon" },
+      { rel: "apple-touch-icon", href: appIconUrl, sizes: "500x500" },
     ],
   }),
   shellComponent: RootShell,
