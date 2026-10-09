@@ -2,11 +2,7 @@ import { Check, Palette } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const SINDCOOP_THEMES = [
-  { id: "ocean", name: "Azul Executivo", description: "Institucional e equilibrado", swatch: "#0f5b6b" },
-  { id: "forest", name: "Verde Esmeralda", description: "Natural e acolhedor", swatch: "#176b4d" },
-  { id: "royal", name: "Roxo Premium", description: "Elegante e contemporâneo", swatch: "#4c3b8f" },
-  { id: "graphite", name: "Grafite", description: "Minimalista e sóbrio", swatch: "#30343b" },
-  { id: "wine", name: "Vinho", description: "Sofisticado e marcante", swatch: "#7a2848" },
+  { id: "ocean", name: "Azul Real & Dourado", description: "Identidade visual oficial inspirada em IMG/modelo.png", swatch: "#174f85" },
 ] as const;
 
 export type SindCoopTheme = (typeof SINDCOOP_THEMES)[number]["id"];
