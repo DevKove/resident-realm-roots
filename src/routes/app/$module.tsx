@@ -53,10 +53,10 @@ const definitions: Record<string, ModuleDefinition> = {
   portaria: { title: "Portaria", table: "acessos_portaria", fields: ["pessoa", "tipo", "observacoes"], columns: ["pessoa", "tipo", "entrada", "saida"] },
   visitantes: { title: "Visitantes", table: "visitantes", fields: ["nome", "documento", "autorizado", "observacoes"], columns: ["nome", "documento", "autorizado", "entrada", "saida"] },
   entregas: { title: "Entregas", table: "entregas", fields: ["destinatario", "transportadora", "descricao"], columns: ["destinatario", "transportadora", "status", "recebido_em"] },
-  documentos: { title: "Documentos", table: "documentos", fields: [], columns: ["categoria", "titulo", "mime_type", "created_at"] },
+  documentos: { title: "Documentos", table: "documentos", fields: ["categoria", "titulo"], columns: ["categoria", "titulo", "mime_type", "tamanho_bytes", "created_at"] },
   financeiro: { title: "Financeiro", table: "despesas", fields: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status", "observacoes"], columns: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status"] },
   relatorios: { title: "Relatórios", table: "auditoria", fields: [], columns: ["acao", "recurso", "tabela", "created_at"] },
-  configuracoes: { title: "Configurações", table: "configuracoes", fields: [], columns: ["updated_at"] },
+  configuracoes: { title: "Configurações", table: "configuracoes", fields: ["regras_reservas", "notificacoes", "financeiro"], columns: ["updated_at"] },
 };
 
 const sideModules = [
@@ -118,6 +118,7 @@ function ModulePage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [mobile, setMobile] = useState(false);
 
@@ -212,8 +213,12 @@ function ModulePage() {
 
   async function save() {
     const isCondoProfile = module === "condominio";
+    const isSettings = module === "configuracoes";
+    const isDocuments = module === "documentos";
     const canManageProfile = ["super_admin", "administrador", "sindico"].includes(ctx?.role ?? "");
-    if (!ctx || (!def.fields.length && !isCondoProfile) || (isCondoProfile ? !canManageProfile : !canCreateModule(ctx.role, module))) return;
+    const canManageSettings = ["super_admin", "administrador"].includes(ctx?.role ?? "");
+    const canManageDocuments = ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx?.role ?? "");
+    if (!ctx || (!def.fields.length && !isCondoProfile) || (isCondoProfile ? !canManageProfile : isSettings ? !canManageSettings : isDocuments ? !canManageDocuments : !canCreateModule(ctx.role, module))) return;
     if (module === "reservas" && areas.length === 0) {
       setError("Cadastre uma área comum antes de solicitar uma reserva.");
       return;
@@ -236,7 +241,10 @@ function ModulePage() {
         else if (["quantidade_unidades", "blocos", "capacidade", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field)) payload[field] = Number(rawValue);
         else if (["area", "fracao_ideal", "taxa", "valor"].includes(field)) payload[field] = Number(rawValue);
         else if (["ativo", "fixado", "autorizado"].includes(field)) payload[field] = rawValue === "true";
-        else payload[field] = rawValue.trim();
+        else if (isSettings && ["regras_reservas", "notificacoes", "financeiro"].includes(field)) {
+          try { payload[field] = JSON.parse(rawValue); }
+          catch { throw new Error("O campo " + label(field) + " precisa conter um JSON válido."); }
+        } else payload[field] = rawValue.trim();
       }
 
       if (isCondoProfile && logoFile) {
@@ -247,6 +255,19 @@ function ModulePage() {
         payload.logo_path = storagePath;
       }
 
+      if (isDocuments) {
+        if (!editingId && !documentFile) throw new Error("Selecione um arquivo para anexar ao documento.");
+        if (documentFile) {
+          const safeName = documentFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+          const storagePath = ctx.id + "/documentos/" + Date.now() + "-" + safeName;
+          const { error: uploadError } = await db.storage.from("documents").upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type || "application/octet-stream" });
+          if (uploadError) throw uploadError;
+          payload.storage_path = storagePath;
+          payload.mime_type = documentFile.type || "application/octet-stream";
+          payload.tamanho_bytes = documentFile.size;
+        }
+        payload.autor_id = userId;
+      }
       if (def.table === "avisos") {
         payload.autor_id = userId;
         payload.conteudo = payload.conteudo || payload.titulo || "";
@@ -272,6 +293,9 @@ function ModulePage() {
       if (isCondoProfile) {
         const { error: saveError } = await db.from("condominios").update(payload).eq("id", ctx.id);
         if (saveError) throw saveError;
+      } else if (isSettings) {
+        const { error: saveError } = await db.from("configuracoes").upsert({ condominio_id: ctx.id, ...payload }, { onConflict: "condominio_id" });
+        if (saveError) throw saveError;
       } else if (editingId) {
         const { error: saveError } = await db.from(def.table).update(payload).eq("id", editingId).eq("condominio_id", ctx.id);
         if (saveError) throw saveError;
@@ -282,6 +306,7 @@ function ModulePage() {
       setForm({});
       setEditingId(null);
       setLogoFile(null);
+      setDocumentFile(null);
       setOpen(false);
       await load();
     } catch (saveError) {
@@ -380,18 +405,19 @@ function ModulePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
+              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
                   onClick={() => {
                     setEditingId(null);
                     setLogoFile(null);
-                    setForm(module === "condominio" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, rows[0][field] == null ? "" : String(rows[0][field])])) : {});
+                    setDocumentFile(null);
+                    setForm(module === "condominio" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, rows[0][field] == null ? "" : String(rows[0][field])])) : module === "configuracoes" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, JSON.stringify(rows[0][field] ?? {}, null, 2)])) : {});
                     setOpen(true);
                   }}
                   className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white sm:px-4"
                 >
                   <Plus className="h-4 w-4" />
-                  {module === "condominio" ? "Editar cadastro" : "Novo registro"}
+                  {module === "condominio" ? "Editar cadastro" : module === "configuracoes" ? "Editar preferências" : "Novo registro"}
                 </button>
               )}
               <button
@@ -522,8 +548,8 @@ function ModulePage() {
                           <option value="">Selecione...</option>
                           {fieldOptions(module, field)!.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
                         </select>
-                      ) : ["conteudo", "descricao", "observacoes", "regras"].includes(field) ? (
-                        <textarea rows={3} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
+                      ) : ["conteudo", "descricao", "observacoes", "regras", "regras_reservas", "notificacoes", "financeiro"].includes(field) ? (
+                        <textarea rows={["regras_reservas", "notificacoes", "financeiro"].includes(field) ? 7 : 3} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
                       ) : (
                         <input
                           required={[
@@ -550,6 +576,14 @@ function ModulePage() {
                     </label>
                   ))}
                 </div>
+                {module === "configuracoes" && <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">Edite as regras de reservas, notificações e parâmetros financeiros em JSON válido. Exemplo: {"{\"ativado\": true}"}.</p>}
+                {module === "documentos" && (
+                  <div className="mt-4 grid gap-2 text-sm font-medium">
+                    Arquivo para anexar
+                    <input type="file" onChange={(event) => setDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <span className="text-xs font-normal text-slate-500">O arquivo será armazenado de forma privada e vinculado ao condomínio ativo.</span>
+                  </div>
+                )}
                 {module === "condominio" && (
                   <div className="mt-4 grid gap-2 text-sm font-medium">
                     Logotipo / foto do condomínio
@@ -568,7 +602,7 @@ function ModulePage() {
                     Cancelar
                   </button>
                   <button disabled={saving} className="rounded-xl bg-slate-950 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
-                    {saving ? "Salvando…" : module === "condominio" || editingId ? "Salvar alterações" : "Salvar registro"}
+                    {saving ? "Salvando…" : module === "condominio" || module === "configuracoes" || editingId ? "Salvar alterações" : "Salvar registro"}
                   </button>
                 </div>
               </form>
