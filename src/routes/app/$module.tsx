@@ -80,7 +80,7 @@ const sideModules = [
   ["configuracoes", "Configurações", Settings],
 ] as const;
 
-const label = (value: string) => value.replaceAll("_", " ").replace(/\\b\\w/g, (char) => char.toUpperCase());
+const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
 function fieldOptions(module: string, field: string): Array<[string, string]> | null {
   if (["ativo", "fixado", "autorizado"].includes(field)) return [["true", "Sim"], ["false", "Não"]];
