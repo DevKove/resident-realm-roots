@@ -289,9 +289,18 @@ function Dashboard() {
               <div>
                 <h3 className="font-semibold text-slate-900">Acesso e privacidade</h3>
                 <p className="mt-1 text-sm leading-6 text-slate-500">Os atalhos exibidos respeitam o perfil de acesso da sua conta. Os registros continuam limitados ao condomínio vinculado à sessão.</p>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  <Link to="/politica-de-privacidade" className="font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-950">Como seus dados são tratados</Link>
+                  <Link to="/termos-de-uso" className="font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-950">Termos de uso</Link>
+                </div>
               </div>
             </div>
           </section>
+
+          <footer className="mt-8 flex flex-col gap-2 border-t border-slate-200 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} SindCoop · Gestão condominial</p>
+            <p>Condomínio ativo: <span className="font-semibold text-slate-700">{ctx.nome}</span></p>
+          </footer>
         </div>
       </main>
     </div>
