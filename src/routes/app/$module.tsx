@@ -136,7 +136,7 @@ function ModulePage() {
         request = request.eq("id", ctx.id).limit(1);
       } else {
         request = request.eq("condominio_id", ctx.id);
-        const orderColumn = def.table === "configuracoes" ? "updated_at" : def.table === "ocorrencias" ? "criado_em" : "created_at";
+        const orderColumn = def.table === "configuracoes" ? "updated_at" : def.table === "ocorrencias" ? "criado_em" : def.table === "acessos_portaria" ? "entrada" : def.table === "entregas" ? "recebido_em" : "created_at";
         request = request.order(orderColumn, { ascending: false }).limit(100);
       }
 
