@@ -39,6 +39,7 @@ function ModulePage() {
   const { module } = Route.useParams();
   const def = definitions[module] ?? { title: "Módulo", table: "", fields: [], columns: [] };
   const [ctx, setCtx] = useState<CondoContext | null>(null);
+  const [contextReady, setContextReady] = useState(false);
   const [rows, setRows] = useState<any[]>([]);
   const [areas, setAreas] = useState<any[]>([]);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -49,7 +50,17 @@ function ModulePage() {
   const [open, setOpen] = useState(false);
 
   const load = async () => {
-    if (!ctx || !def.table) return;
+    if (!contextReady) return;
+    if (!def.table) {
+      setRows([]);
+      setError("Módulo não encontrado.");
+      setBusy(false);
+      return;
+    }
+    if (!ctx) {
+      setBusy(false);
+      return;
+    }
     if (!canAccessModule(ctx.role, module)) {
       setRows([]);
       setError("Seu perfil não possui permissão para acessar este módulo.");
@@ -92,9 +103,13 @@ function ModulePage() {
   useEffect(() => {
     void (async () => {
       try {
-        setCtx(await getCondoContext());
+        const context = await getCondoContext();
+        setCtx(context);
+        if (!context) setError("Nenhum condomínio vinculado a esta conta.");
       } catch {
         setError("Sessão inválida. Entre novamente para continuar.");
+      } finally {
+        setContextReady(true);
         setBusy(false);
       }
     })();
@@ -102,7 +117,7 @@ function ModulePage() {
 
   useEffect(() => {
     void load();
-  }, [ctx, module]);
+  }, [ctx, module, contextReady]);
 
   const filtered = useMemo(
     () => rows.filter((row) => JSON.stringify(row).toLowerCase().includes(query.toLowerCase())),
