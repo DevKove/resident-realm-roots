@@ -30,6 +30,7 @@ import { getCondoContext, type CondoContext } from "@/lib/sindcoop-data";
 import { canAccessModule, canCreateModule, canDeleteModule } from "@/lib/sindcoop-permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { getDocumentStorageBucket } from "@/lib/sindcoop-document-storage";
+import { validateCondoLogo, validateDocumentUpload } from "@/lib/sindcoop-upload-validation";
 
 export const Route = createFileRoute("/app/$module")({ component: ModulePage });
 
@@ -249,6 +250,8 @@ function ModulePage() {
       }
 
       if (isCondoProfile && logoFile) {
+        const validationError = validateCondoLogo(logoFile);
+        if (validationError) throw new Error(validationError);
         const safeName = logoFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
         const storagePath = ctx.id + "/logo-" + Date.now() + "-" + safeName;
         const { error: uploadError } = await db.storage.from("condominium-assets").upload(storagePath, logoFile, { upsert: true, contentType: logoFile.type });
@@ -259,10 +262,12 @@ function ModulePage() {
       if (isDocuments) {
         if (!editingId && !documentFile) throw new Error("Selecione um arquivo para anexar ao documento.");
         if (documentFile) {
+          const validationError = validateDocumentUpload(documentFile);
+          if (validationError) throw new Error(validationError);
           const safeName = documentFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
           const storageBucket = getDocumentStorageBucket(String(payload.categoria ?? form.categoria ?? ""));
           const storagePath = ctx.id + "/documentos/" + Date.now() + "-" + safeName;
-          const { error: uploadError } = await db.storage.from(storageBucket).upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type || "application/octet-stream" });
+          const { error: uploadError } = await db.storage.from(storageBucket).upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type });
           if (uploadError) throw uploadError;
           payload.storage_path = storagePath;
           payload.mime_type = documentFile.type || "application/octet-stream";
@@ -595,7 +600,7 @@ function ModulePage() {
                 {module === "documentos" && (
                   <div className="mt-4 grid gap-2 text-sm font-medium">
                     Arquivo para anexar
-                    <input type="file" onChange={(event) => setDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv,.doc,.docx,.xls,.xlsx" onChange={(event) => setDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
                     <span className="text-xs font-normal text-slate-500">O arquivo será armazenado de forma privada e vinculado ao condomínio ativo. Para arquivos financeiros, use uma categoria como “Financeiro”, “Prestação de contas”, “Comprovante”, “Boleto” ou “Nota fiscal”; esses arquivos ficam em um espaço restrito à gestão.</span>
                   </div>
                 )}
@@ -603,7 +608,7 @@ function ModulePage() {
                   <div className="mt-4 grid gap-2 text-sm font-medium">
                     Logotipo / foto do condomínio
                     {logoUrl && <img src={logoUrl} alt="Prévia do logotipo atual" className="h-24 w-24 rounded-xl border object-cover" />}
-                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
                     <span className="text-xs font-normal text-slate-500">Formatos: PNG, JPG, WEBP ou SVG. O arquivo será armazenado no espaço privado do condomínio.</span>
                   </div>
                 )}
