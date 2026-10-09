@@ -157,7 +157,10 @@ function ModulePage() {
         setAreas(areaData ?? []);
       }
 
-      let request = db.from(def.table).select("*");
+      const selectedFields = def.table === "condominios"
+        ? Array.from(new Set(["id", ...def.columns, "logo_path"]))
+        : Array.from(new Set(["id", "condominio_id", ...def.columns]));
+      let request = db.from(def.table).select(selectedFields.join(","));
       if (def.table === "condominios") {
         request = request.eq("id", ctx.id).limit(1);
       } else {
@@ -212,6 +215,36 @@ function ModulePage() {
     () => rows.filter((row) => JSON.stringify(row).toLowerCase().includes(query.toLowerCase())),
     [rows, query],
   );
+
+  async function editRow(row: any) {
+    if (!ctx || !def.fields.length || !canCreateModule(ctx.role, module)) return;
+    setError("");
+    try {
+      const db = supabase as any;
+      const selectedFields = Array.from(new Set([
+        "id",
+        ...(def.table === "condominios" ? [] : ["condominio_id"]),
+        ...def.fields,
+      ]));
+      let request = db.from(def.table).select(selectedFields.join(",")).eq("id", row.id);
+      if (def.table === "condominios") request = request.eq("id", ctx.id);
+      else request = request.eq("condominio_id", ctx.id);
+      const { data, error: editError } = await request.single();
+      if (editError || !data) throw editError ?? new Error("Registro não encontrado.");
+      setEditingId(def.table === "condominios" || module === "configuracoes" ? null : row.id);
+      setForm(Object.fromEntries(def.fields.map((field) => [
+        field,
+        data[field] == null ? "" : module === "configuracoes"
+          ? JSON.stringify(data[field], null, 2)
+          : String(data[field]),
+      ])));
+      setLogoFile(null);
+      setDocumentFile(null);
+      setOpen(true);
+    } catch {
+      setError("Não foi possível carregar os dados para edição.");
+    }
+  }
 
   async function save() {
     const isCondoProfile = module === "condominio";
@@ -417,10 +450,14 @@ function ModulePage() {
               {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "sub_sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
                   onClick={() => {
+                    if ((module === "condominio" || module === "configuracoes") && rows[0]) {
+                      void editRow(rows[0]);
+                      return;
+                    }
                     setEditingId(null);
                     setLogoFile(null);
                     setDocumentFile(null);
-                    setForm(module === "condominio" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, rows[0][field] == null ? "" : String(rows[0][field])])) : module === "configuracoes" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, JSON.stringify(rows[0][field] ?? {}, null, 2)])) : {});
+                    setForm({});
                     setOpen(true);
                   }}
                   className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white sm:px-4"
@@ -523,7 +560,7 @@ function ModulePage() {
                         ))}
                         {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && (
                           <td className="space-x-3 whitespace-nowrap px-4 py-3 text-right">
-                            {canCreateModule(ctx.role, module) && def.fields.length > 0 && <button onClick={() => { setEditingId(row.id); setForm(Object.fromEntries(def.fields.map((field) => [field, row[field] == null ? "" : String(row[field])]))); setOpen(true); }} className="text-xs font-semibold text-slate-700 hover:underline">Editar</button>}
+                            {canCreateModule(ctx.role, module) && def.fields.length > 0 && <button onClick={() => void editRow(row)} className="text-xs font-semibold text-slate-700 hover:underline">Editar</button>}
                             {canDeleteModule(ctx.role, module) && <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">Excluir</button>}
                           </td>
                         )}
