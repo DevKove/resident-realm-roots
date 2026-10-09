@@ -136,14 +136,21 @@ function ModulePage() {
         request = request.eq("id", ctx.id).limit(1);
       } else {
         request = request.eq("condominio_id", ctx.id);
-        request = request.order(def.table === "configuracoes" ? "updated_at" : "created_at", { ascending: false }).limit(100);
+        const orderColumn = def.table === "configuracoes" ? "updated_at" : def.table === "ocorrencias" ? "criado_em" : "created_at";
+        request = request.order(orderColumn, { ascending: false }).limit(100);
       }
 
       const { data, error: loadError } = await request;
       if (loadError) throw loadError;
       setRows(data ?? []);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Não foi possível carregar os dados.");
+      const message = loadError && typeof loadError === "object" && "message" in loadError
+        ? String(loadError.message)
+        : loadError instanceof Error ? loadError.message : "";
+      console.error(`[SindCoop] Falha ao carregar módulo "${module}":`, loadError);
+      setError(message && !message.toLowerCase().includes("does not exist")
+        ? `Não foi possível carregar os dados. ${message}`
+        : "Não foi possível carregar os dados. Verifique a configuração do módulo e tente novamente.");
     } finally {
       setBusy(false);
     }
