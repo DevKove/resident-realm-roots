@@ -29,7 +29,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }, { rel: "icon", href: import.meta.env.BASE_URL + "favicon.ico", type: "image/x-icon" }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: import.meta.env.BASE_URL + "IMG/favicon.png", type: "image/png", sizes: "any" },
+      { rel: "shortcut icon", href: import.meta.env.BASE_URL + "IMG/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: import.meta.env.BASE_URL + "IMG/icon.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
