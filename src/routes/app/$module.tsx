@@ -483,7 +483,7 @@ function ModulePage() {
               ].map((item) => <div key={item.label} className="rounded-2xl border bg-white p-4 shadow-sm"><p className="text-xs font-medium text-slate-500">{item.label}</p><p className="mt-2 text-2xl font-bold text-slate-900">{item.value}</p></div>)}
             </div>
           )}
-          <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
+          {module !== "condominio" && <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
             <div className="overflow-x-auto">
               {busy ? (
                 <div className="p-10 text-center text-sm text-slate-500">
@@ -526,7 +526,18 @@ function ModulePage() {
                 </table>
               )}
             </div>
-          </section>
+          </section>}
+
+          {module === "condominio" && !busy && !rows[0] && (
+            <section className="mt-5 rounded-2xl border border-dashed bg-white p-8 text-center shadow-sm">
+              <Building2 className="mx-auto h-10 w-10 text-slate-400" />
+              <h2 className="mt-3 text-lg font-bold text-slate-900">Complete o cadastro do condomínio</h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">Adicione endereço, CNPJ, contatos, quantidade de unidades e a identificação visual para deixar o perfil completo.</p>
+              {ctx && ["super_admin", "administrador", "sindico"].includes(ctx.role) && (
+                <button onClick={() => { setEditingId(null); setLogoFile(null); setForm(Object.fromEntries(def.fields.map((field) => [field, ""]))); setOpen(true); }} className="mt-5 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white">Cadastrar dados do condomínio</button>
+              )}
+            </section>
+          )}
 
           {open && (
             <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-4 sindcoop-fade-in">
