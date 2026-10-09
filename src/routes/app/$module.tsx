@@ -17,6 +17,7 @@ type ModuleDefinition = {
 const definitions: Record<string, ModuleDefinition> = {
   condominio: { title: "Meu Condomínio", table: "condominios", fields: [], columns: ["nome", "cidade", "estado", "email"] },
   unidades: { title: "Unidades", table: "unidades", fields: ["numero", "bloco", "andar", "tipo", "status"], columns: ["numero", "bloco", "andar", "status"] },
+  "areas-comuns": { title: "Áreas comuns", table: "areas_comuns", fields: ["nome", "descricao", "capacidade", "regras", "taxa"], columns: ["nome", "capacidade", "taxa", "ativo"] },
   moradores: { title: "Moradores", table: "moradores", fields: ["nome", "cpf", "email", "telefone", "tipo", "status"], columns: ["nome", "email", "telefone", "tipo", "status"] },
   funcionarios: { title: "Funcionários", table: "funcionarios", fields: ["nome", "cpf", "funcao", "telefone", "email", "status"], columns: ["nome", "funcao", "telefone", "status"] },
   veiculos: { title: "Veículos", table: "veiculos", fields: ["placa", "marca_modelo", "cor", "tipo", "vaga"], columns: ["placa", "marca_modelo", "cor", "tipo", "vaga"] },
@@ -311,8 +312,8 @@ function ModulePage() {
                     ) : (
                       <input
                         required={["nome", "numero", "titulo", "descricao", "categoria", "pessoa", "tipo", "destinatario", "area_id", "inicio", "fim", "valor"].includes(field)}
-                        type={field === "inicio" || field === "fim" ? "datetime-local" : field.includes("valor") ? "number" : field.includes("email") ? "email" : "text"}
-                        step={field === "valor" ? "0.01" : undefined}
+                        type={field === "inicio" || field === "fim" ? "datetime-local" : ["valor", "taxa", "capacidade"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
+                        step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
                         value={form[field] ?? ""}
                         onChange={(event) => setForm({ ...form, [field]: event.target.value })}
                         className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200"
