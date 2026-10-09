@@ -40,21 +40,21 @@ type ModuleDefinition = {
 };
 
 const definitions: Record<string, ModuleDefinition> = {
-  condominio: { title: "Meu Condomínio", table: "condominios", fields: [], columns: ["nome", "cidade", "estado", "email"] },
-  unidades: { title: "Unidades", table: "unidades", fields: ["numero", "bloco", "andar", "tipo", "status"], columns: ["numero", "bloco", "andar", "status"] },
-  "areas-comuns": { title: "Áreas comuns", table: "areas_comuns", fields: ["nome", "descricao", "capacidade", "regras", "taxa"], columns: ["nome", "capacidade", "taxa", "ativo"] },
-  moradores: { title: "Moradores", table: "moradores", fields: ["nome", "cpf", "email", "telefone", "tipo", "status"], columns: ["nome", "email", "telefone", "tipo", "status"] },
-  funcionarios: { title: "Funcionários", table: "funcionarios", fields: ["nome", "cpf", "funcao", "telefone", "email", "status"], columns: ["nome", "funcao", "telefone", "status"] },
-  veiculos: { title: "Veículos", table: "veiculos", fields: ["placa", "marca_modelo", "cor", "tipo", "vaga"], columns: ["placa", "marca_modelo", "cor", "tipo", "vaga"] },
-  animais: { title: "Animais", table: "animais", fields: ["nome", "especie", "raca", "porte"], columns: ["nome", "especie", "raca", "porte"] },
-  avisos: { title: "Avisos", table: "avisos", fields: ["titulo", "conteudo", "prioridade"], columns: ["titulo", "prioridade", "publicado_em"] },
+  condominio: { title: "Meu Condomínio", table: "condominios", fields: ["nome", "cnpj", "endereco", "numero", "complemento", "bairro", "cep", "cidade", "estado", "telefone", "email", "quantidade_unidades", "blocos", "descricao"], columns: ["nome", "cnpj", "cidade", "estado", "email"] },
+  unidades: { title: "Unidades", table: "unidades", fields: ["numero", "bloco", "andar", "tipo", "area", "fracao_ideal", "status", "observacoes"], columns: ["numero", "bloco", "andar", "tipo", "status"] },
+  "areas-comuns": { title: "Áreas comuns", table: "areas_comuns", fields: ["nome", "descricao", "capacidade", "regras", "hora_inicio", "hora_fim", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias", "taxa", "ativo"], columns: ["nome", "capacidade", "taxa", "hora_inicio", "hora_fim", "ativo"] },
+  moradores: { title: "Moradores", table: "moradores", fields: ["nome", "cpf", "email", "telefone", "data_nascimento", "tipo", "status"], columns: ["nome", "email", "telefone", "tipo", "status"] },
+  funcionarios: { title: "Funcionários", table: "funcionarios", fields: ["nome", "cpf", "funcao", "telefone", "email", "data_admissao", "status", "observacoes"], columns: ["nome", "funcao", "telefone", "email", "status"] },
+  veiculos: { title: "Veículos", table: "veiculos", fields: ["placa", "marca_modelo", "cor", "tipo", "vaga", "observacoes"], columns: ["placa", "marca_modelo", "cor", "tipo", "vaga"] },
+  animais: { title: "Animais", table: "animais", fields: ["nome", "especie", "raca", "porte", "observacoes"], columns: ["nome", "especie", "raca", "porte"] },
+  avisos: { title: "Avisos", table: "avisos", fields: ["titulo", "conteudo", "prioridade", "fixado"], columns: ["titulo", "prioridade", "publicado_em", "fixado"] },
   ocorrencias: { title: "Ocorrências", table: "ocorrencias", fields: ["titulo", "descricao", "categoria", "prioridade"], columns: ["titulo", "categoria", "prioridade", "status"] },
   reservas: { title: "Reservas", table: "reservas", fields: ["area_id", "inicio", "fim", "observacoes"], columns: ["inicio", "fim", "status", "observacoes"] },
   portaria: { title: "Portaria", table: "acessos_portaria", fields: ["pessoa", "tipo", "observacoes"], columns: ["pessoa", "tipo", "entrada", "saida"] },
   visitantes: { title: "Visitantes", table: "visitantes", fields: ["nome", "documento", "autorizado", "observacoes"], columns: ["nome", "documento", "autorizado", "entrada", "saida"] },
   entregas: { title: "Entregas", table: "entregas", fields: ["destinatario", "transportadora", "descricao"], columns: ["destinatario", "transportadora", "status", "recebido_em"] },
   documentos: { title: "Documentos", table: "documentos", fields: [], columns: ["categoria", "titulo", "mime_type", "created_at"] },
-  financeiro: { title: "Financeiro", table: "despesas", fields: ["descricao", "fornecedor", "valor", "vencimento", "status"], columns: ["descricao", "fornecedor", "valor", "vencimento", "status"] },
+  financeiro: { title: "Financeiro", table: "despesas", fields: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status", "observacoes"], columns: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status"] },
   relatorios: { title: "Relatórios", table: "auditoria", fields: [], columns: ["acao", "recurso", "tabela", "created_at"] },
   configuracoes: { title: "Configurações", table: "configuracoes", fields: [], columns: ["updated_at"] },
 };
@@ -96,6 +96,9 @@ function ModulePage() {
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState("");
   const [mobile, setMobile] = useState(false);
 
   const load = async () => {
@@ -142,7 +145,14 @@ function ModulePage() {
 
       const { data, error: loadError } = await request;
       if (loadError) throw loadError;
-      setRows(data ?? []);
+      const loadedRows = data ?? [];
+      setRows(loadedRows);
+      if (def.table === "condominios" && loadedRows[0]?.logo_path) {
+        const { data: signedLogo } = await db.storage.from("condominium-assets").createSignedUrl(loadedRows[0].logo_path, 3600);
+        setLogoUrl(signedLogo?.signedUrl ?? "");
+      } else if (def.table === "condominios") {
+        setLogoUrl("");
+      }
     } catch (loadError) {
       const message = loadError && typeof loadError === "object" && "message" in loadError
         ? String(loadError.message)
@@ -181,7 +191,9 @@ function ModulePage() {
   );
 
   async function save() {
-    if (!ctx || !def.fields.length || !canCreateModule(ctx.role, module)) return;
+    const isCondoProfile = module === "condominio";
+    const canManageProfile = ["super_admin", "administrador", "sindico"].includes(ctx?.role ?? "");
+    if (!ctx || (!def.fields.length && !isCondoProfile) || (isCondoProfile ? !canManageProfile : !canCreateModule(ctx.role, module))) return;
     if (module === "reservas" && areas.length === 0) {
       setError("Cadastre uma área comum antes de solicitar uma reserva.");
       return;
@@ -196,11 +208,23 @@ function ModulePage() {
       const userId = userData.user?.id;
       if (!userId) throw new Error("Sessão expirada. Entre novamente.");
 
-      const payload: Record<string, any> = { condominio_id: ctx.id };
+      const payload: Record<string, any> = isCondoProfile ? {} : { condominio_id: ctx.id };
       for (const field of def.fields) {
-        const value = form[field]?.trim();
-        if (!value) continue;
-        payload[field] = field === "inicio" || field === "fim" ? new Date(value).toISOString() : value;
+        const rawValue = form[field];
+        if (rawValue === undefined || rawValue.trim() === "") continue;
+        if (["inicio", "fim"].includes(field)) payload[field] = new Date(rawValue).toISOString();
+        else if (["quantidade_unidades", "blocos", "capacidade", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field)) payload[field] = Number(rawValue);
+        else if (["area", "fracao_ideal", "taxa", "valor"].includes(field)) payload[field] = Number(rawValue);
+        else if (["ativo", "fixado", "autorizado"].includes(field)) payload[field] = rawValue === "true";
+        else payload[field] = rawValue.trim();
+      }
+
+      if (isCondoProfile && logoFile) {
+        const safeName = logoFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+        const storagePath = ctx.id + "/logo-" + Date.now() + "-" + safeName;
+        const { error: uploadError } = await db.storage.from("condominium-assets").upload(storagePath, logoFile, { upsert: true, contentType: logoFile.type });
+        if (uploadError) throw uploadError;
+        payload.logo_path = storagePath;
       }
 
       if (def.table === "avisos") {
@@ -225,9 +249,19 @@ function ModulePage() {
         payload.status = "waiting_pickup";
       }
 
-      const { error: saveError } = await db.from(def.table).insert(payload);
-      if (saveError) throw saveError;
+      if (isCondoProfile) {
+        const { error: saveError } = await db.from("condominios").update(payload).eq("id", ctx.id);
+        if (saveError) throw saveError;
+      } else if (editingId) {
+        const { error: saveError } = await db.from(def.table).update(payload).eq("id", editingId).eq("condominio_id", ctx.id);
+        if (saveError) throw saveError;
+      } else {
+        const { error: saveError } = await db.from(def.table).insert(payload);
+        if (saveError) throw saveError;
+      }
       setForm({});
+      setEditingId(null);
+      setLogoFile(null);
       setOpen(false);
       await load();
     } catch (saveError) {
@@ -326,13 +360,18 @@ function ModulePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {ctx && canCreateModule(ctx.role, module) && def.fields.length > 0 && (
+              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
-                  onClick={() => setOpen(true)}
+                  onClick={() => {
+                    setEditingId(null);
+                    setLogoFile(null);
+                    setForm(module === "condominio" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, rows[0][field] == null ? "" : String(rows[0][field])])) : {});
+                    setOpen(true);
+                  }}
                   className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white sm:px-4"
                 >
                   <Plus className="h-4 w-4" />
-                  Novo
+                  {module === "condominio" ? "Editar cadastro" : "Novo registro"}
                 </button>
               )}
               <button
