@@ -1,7 +1,28 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import modeloUrl from "../../IMG/modelo.png?url";
-import { AlertTriangle, Bell, Building2, CalendarDays, FileText, Home, LayoutDashboard, LogOut, Menu, Users, WalletCards, X, UserRound, Car, PawPrint, BriefcaseBusiness, ShieldCheck, Package, ClipboardList, Settings } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  Car,
+  ClipboardList,
+  FileText,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  PawPrint,
+  Settings,
+  ShieldCheck,
+  UserRound,
+  Users,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { getCondoContext, dashboardStats, signOut, type CondoContext } from "@/lib/sindcoop-data";
 import { supabase } from "@/integrations/supabase/client";
 import { canAccessModule } from "@/lib/sindcoop-permissions";
@@ -15,34 +36,162 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const modules = [
-  ["condominio","Meu Condomínio",Building2],["unidades","Unidades",Home],["areas-comuns","Áreas comuns",CalendarDays],["moradores","Moradores",Users],["funcionarios","Funcionários",BriefcaseBusiness],
-  ["veiculos","Veículos",Car],["animais","Animais",PawPrint],["avisos","Avisos",Bell],["ocorrencias","Ocorrências",AlertTriangle],
-  ["reservas","Reservas",CalendarDays],["portaria","Portaria",ShieldCheck],["visitantes","Visitantes",UserRound],["entregas","Entregas",Package],
-  ["documentos","Documentos",FileText],["financeiro","Financeiro",WalletCards],["relatorios","Relatórios",ClipboardList],["configuracoes","Configurações",Settings],
+  ["dashboard", "Dashboard", LayoutDashboard],
+  ["condominio", "Meu Condomínio", Building2],
+  ["unidades", "Unidades", Home],
+  ["areas-comuns", "Áreas comuns", CalendarDays],
+  ["moradores", "Moradores", Users],
+  ["funcionarios", "Funcionários", BriefcaseBusiness],
+  ["veiculos", "Veículos", Car],
+  ["animais", "Animais", PawPrint],
+  ["avisos", "Avisos", Bell],
+  ["ocorrencias", "Ocorrências", AlertTriangle],
+  ["reservas", "Reservas", CalendarDays],
+  ["portaria", "Portaria", ShieldCheck],
+  ["visitantes", "Visitantes", UserRound],
+  ["entregas", "Entregas", Package],
+  ["documentos", "Documentos", FileText],
+  ["financeiro", "Financeiro", WalletCards],
+  ["relatorios", "Relatórios", ClipboardList],
+  ["configuracoes", "Configurações", Settings],
 ] as const;
 
 function Dashboard() {
-  const navigate=useNavigate(); const [ctx,setCtx]=useState<CondoContext|null>(null); const [stats,setStats]=useState<any>(null); const [error,setError]=useState(""); const [mobile,setMobile]=useState(false); const [busy,setBusy]=useState(true);
-  useEffect(()=>{(async()=>{try{const c=await getCondoContext();setCtx(c);if(c)setStats(await dashboardStats(c.id));}catch(e){setError("Não foi possível carregar os dados do condomínio.");}finally{setBusy(false)}})()},[]);
-  async function logout(){await signOut();await navigate({to:"/"});}
-  if(busy)return <div className="min-h-screen grid place-items-center bg-slate-50"><div className="flex items-center gap-3 text-sm text-slate-500"><span className="sindcoop-skeleton h-9 w-9 rounded-xl" aria-hidden="true"/><span>Carregando SindCoop…</span></div></div>;
-  if(!ctx)return <main className="min-h-screen grid place-items-center bg-slate-50 p-6"><section className="max-w-md rounded-3xl border bg-white p-8 text-center shadow-sm"><Building2 className="mx-auto h-10 w-10"/><h1 className="mt-4 text-xl font-bold">Nenhum condomínio vinculado</h1><p className="mt-2 text-sm text-slate-500">Sua conta precisa estar vinculada a um condomínio para acessar a operação.</p><Link to="/cadastro" className="mt-6 inline-flex rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">Criar condomínio</Link></section></main>;
-  return <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
-    {mobile&&<button aria-label="Fechar menu" onClick={()=>setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden"/>}
-    <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 "+(mobile?"translate-x-0":"-translate-x-full")}>
-      <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5"><span className="sindcoop-brand-mark"><img src={modeloUrl} alt="Identidade visual SindCoop" /></span><div className="min-w-0"><strong className="sindcoop-brand-name">SindCoop</strong><p className="sindcoop-brand-caption">GESTÃO CONDOMINIAL</p></div><button className="ml-auto lg:hidden" onClick={()=>setMobile(false)}><X className="h-5 w-5"/></button></div>
-      <div className="border-b p-4"><div className="rounded-xl bg-slate-100 p-3"><p className="text-[11px] uppercase tracking-wide text-slate-500">Condomínio ativo</p><p className="mt-1 truncate font-semibold">{ctx.nome}</p><p className="mt-1 text-xs capitalize text-slate-500">{ctx.role.replace("_"," ")}</p></div></div>
-      <nav className="flex-1 overflow-y-auto p-3"><button onClick={()=>navigate({to:"/dashboard"})} className="mb-2 flex w-full items-center gap-3 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white"><LayoutDashboard className="h-4 w-4"/>Dashboard</button>{modules.filter(([key])=>canAccessModule(ctx.role,key)).map(([key,label,Icon])=><Link key={key} to={"/app/"+key} onClick={()=>setMobile(false)} className="sindcoop-nav-item mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"><Icon className="h-4 w-4"/>{label}</Link>)}</nav>
-      <div className="border-t p-3"><button onClick={logout} className="sindcoop-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100"><LogOut className="h-4 w-4"/>Sair</button></div>
-    </aside>
-    <main className="min-h-screen lg:pl-72"><header className="sticky top-0 z-20 flex h-20 items-center border-b bg-white/95 px-4 backdrop-blur sm:px-6"><button className="sindcoop-icon-button rounded-lg p-2 lg:hidden" onClick={()=>setMobile(true)}><Menu/></button><div className="ml-2 flex-1"><p className="text-xs text-slate-400">SindCoop / Dashboard</p><h1 className="text-xl font-bold">Visão geral</h1></div><div className="hidden text-right sm:block"><p className="text-sm font-semibold">{ctx.nome}</p><p className="text-xs capitalize text-slate-500">{ctx.role.replace("_"," ")}</p></div></header>
-      <div className="sindcoop-dashboard-content p-4 sm:p-6 lg:p-8">{error&&<div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}<section className="sindcoop-dashboard-hero mb-7"><div className="sindcoop-dashboard-hero-copy"><span className="sindcoop-eyebrow">CENTRAL DE GESTÃO</span><p className="mt-3 text-sm text-blue-100">Bem-vindo ao ambiente do condomínio</p><h2 className="mt-1 text-3xl font-bold sm:text-4xl">Painel operacional</h2><p className="mt-3 max-w-xl text-sm leading-6 text-blue-100">Acompanhe os principais indicadores e acesse rapidamente as rotinas administrativas.</p></div><div className="sindcoop-dashboard-hero-art" aria-hidden="true"><img src="/IMG/modelo.png" alt="" /></div><div className="sindcoop-hero-goldline" /></section>
-      <div className="sindcoop-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
-        ["Unidades",stats?.units??0,Home],["Moradores ativos",stats?.residents??0,Users],["Ocorrências abertas",stats?.openOccurrences??0,AlertTriangle],["Reservas futuras",stats?.reservations??0,CalendarDays],
-        ["Funcionários",stats?.employees??0,BriefcaseBusiness],["Visitantes",stats?.visitors??0,UserRound],["Entregas pendentes",stats?.deliveries??0,Package],
-      ].map(([label,value,Icon])=><div key={String(label)} className="sindcoop-stat-card rounded-2xl border bg-white p-5 shadow-sm"><div className="sindcoop-stat-topline"><span className="sindcoop-stat-icon grid h-11 w-11 place-items-center rounded-2xl bg-slate-100"><Icon className="h-5 w-5"/></span><span className="sindcoop-stat-dot" aria-hidden="true" /></div><p className="mt-5 text-sm font-medium text-slate-500">{label}</p><p className="mt-1 text-3xl font-bold tracking-tight">{String(value)}</p><span className="sindcoop-stat-caption">Indicador do condomínio</span></div>)}</div>
-      <section className="mt-6 rounded-2xl border bg-white p-6 shadow-sm"><div className="flex items-center gap-3"><ShieldCheck className="h-5 w-5"/><div><h3 className="font-semibold">Arquitetura segura por condomínio</h3><p className="mt-1 text-sm text-slate-500">Os dados desta área são filtrados pelo vínculo do usuário e protegidos por RLS no PostgreSQL. Nenhum dado demonstrativo é usado no painel.</p></div></div></section>
-      <section className="mt-6"><h3 className="mb-3 font-semibold">Acesso rápido</h3><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{modules.slice(0,8).map(([key,label,Icon])=><Link key={key} to={"/app/"+key} className="sindcoop-action-card flex items-center gap-3 rounded-2xl border bg-white p-4 text-sm font-semibold shadow-sm hover:border-slate-300"><span className="sindcoop-action-icon grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100"><Icon className="h-5 w-5"/></span>{label}<span className="ml-auto text-slate-300">→</span></Link>)}</div></section>
-      </div></main>
-  </div>;
+  const navigate = useNavigate();
+  const [ctx, setCtx] = useState<CondoContext | null>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [error, setError] = useState("");
+  const [mobile, setMobile] = useState(false);
+  const [busy, setBusy] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const c = await getCondoContext();
+        setCtx(c);
+        if (c) setStats(await dashboardStats(c.id));
+      } catch {
+        setError("Não foi possível carregar os dados do condomínio.");
+      } finally {
+        setBusy(false);
+      }
+    })();
+  }, []);
+
+  async function logout() {
+    await signOut();
+    await navigate({ to: "/" });
+  }
+
+  if (busy) return <div className="min-h-screen grid place-items-center bg-slate-50"><div className="flex items-center gap-3 text-sm text-slate-500"><span className="sindcoop-skeleton h-9 w-9 rounded-full" /><span>Carregando dashboard…</span></div></div>;
+  if (!ctx) return <main className="min-h-screen grid place-items-center bg-slate-50 p-6"><section className="max-w-md rounded-3xl border bg-white p-8 text-center shadow-sm"><Building2 className="mx-auto h-10 w-10 text-slate-400" /><h1 className="mt-4 text-xl font-semibold">Nenhum condomínio encontrado</h1><p className="mt-2 text-sm text-slate-500">Entre com uma conta vinculada a um condomínio para continuar.</p></section></main>;
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
+      {mobile && <button aria-label="Fechar menu" onClick={() => setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden" />}
+
+      <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 " + (mobile ? "translate-x-0" : "-translate-x-full")}>
+        <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5">
+          <span className="sindcoop-brand-mark"><img src={modeloUrl} alt="Identidade visual SindCoop" /></span>
+          <div className="min-w-0">
+            <span className="sindcoop-brand-name block truncate">SindCoop</span>
+            <span className="sindcoop-brand-caption block uppercase">Gestão condominial</span>
+          </div>
+        </div>
+
+        <div className="border-b p-4">
+          <div className="rounded-xl bg-slate-100 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500">Condomínio ativo</p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-900">{ctx.name}</p>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3">
+          {modules.map(([key, label, Icon]) => {
+            const isActive = key === "dashboard";
+            const destination = key === "dashboard" ? "/dashboard" : `/app/${key}`;
+            return (
+              <Link key={key} to={destination} className={"sindcoop-nav-item mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 " + (isActive ? "bg-slate-100 text-slate-900 shadow-sm" : "hover:bg-slate-100")}>
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t p-3">
+          <button onClick={logout} className="sindcoop-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100">
+            <LogOut className="h-4 w-4" /> Sair
+          </button>
+        </div>
+      </aside>
+
+      <main className="min-h-screen lg:pl-72">
+        <header className="sticky top-0 z-20 flex h-20 items-center border-b bg-white/95 px-4 backdrop-blur sm:px-6">
+          <button className="sindcoop-icon-button lg:hidden rounded-xl border bg-white p-2.5" onClick={() => setMobile(true)} aria-label="Abrir menu">
+            <Menu className="h-4 w-4" />
+          </button>
+
+          <div className="flex w-full items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400">SindCoop / Dashboard</p>
+              <h1 className="text-xl font-bold text-slate-900">Visão geral</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="sindcoop-icon-button rounded-xl border bg-white p-2.5" aria-label="Notificações"><Bell className="h-4 w-4" /></button>
+              <div className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-medium text-slate-700">
+                <Building2 className="h-4 w-4" />
+                <span className="truncate max-w-40">{ctx.name}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="sindcoop-dashboard-content p-4 sm:p-6 lg:p-8">
+          {error && <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+
+          <section className="sindcoop-dashboard-hero overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm">
+            <div className="relative px-6 py-7 sm:px-8 sm:py-8">
+              <div className="sindcoop-dashboard-hero-copy max-w-2xl">
+                <p className="sindcoop-eyebrow">Central de gestão</p>
+                <p className="mt-3 text-sm text-slate-200">Bem-vindo ao ambiente do condomínio</p>
+                <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Painel operacional</h2>
+                <p className="mt-3 max-w-xl text-sm text-slate-200 sm:text-base">Acompanhe indicadores, ações pendentes e o funcionamento geral do seu condomínio em um único painel.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="sindcoop-stagger mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Unidades", stats?.units ?? 0, Home],
+              ["Moradores ativos", stats?.residents ?? 0, Users],
+              ["Ocorrências abertas", stats?.openOccurrences ?? 0, AlertTriangle],
+              ["Reservas futuras", stats?.reservations ?? 0, CalendarDays],
+            ].map(([label, value, Icon]) => (
+              <div key={String(label)} className="sindcoop-stat-card rounded-2xl border bg-white p-5 shadow-sm">
+                <div className="sindcoop-stat-topline">
+                  <span className="sindcoop-stat-icon inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-slate-100"><Icon className="h-4 w-4" /></span>
+                  <span className="sindcoop-stat-dot" />
+                </div>
+                <div className="mt-6">
+                  <p className="text-sm text-slate-500">{String(label)}</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{Number(value)}</p>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="mt-6 rounded-2xl border bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="h-5 w-5 text-slate-600" />
+              <div>
+                <h3 className="font-semibold text-slate-900">Arquitetura do condomínio</h3>
+                <p className="text-sm text-slate-500">Os dados do painel são carregados diretamente do ambiente autorizado do condomínio.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  );
 }
