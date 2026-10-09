@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import modeloUrl from "../../IMG/modelo.png?url";
 import { AlertTriangle, Bell, Building2, CalendarDays, FileText, Home, LayoutDashboard, LogOut, Menu, Users, WalletCards, X, UserRound, Car, PawPrint, BriefcaseBusiness, ShieldCheck, Package, ClipboardList, Settings } from "lucide-react";
 import { getCondoContext, dashboardStats, signOut, type CondoContext } from "@/lib/sindcoop-data";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +30,7 @@ function Dashboard() {
   return <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
     {mobile&&<button aria-label="Fechar menu" onClick={()=>setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden"/>}
     <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 "+(mobile?"translate-x-0":"-translate-x-full")}>
-      <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5"><span className="sindcoop-brand-mark"><img src="/IMG/modelo.png" alt="Identidade visual SindCoop" /></span><div className="min-w-0"><strong className="sindcoop-brand-name">SindCoop</strong><p className="sindcoop-brand-caption">GESTÃO CONDOMINIAL</p></div><button className="ml-auto lg:hidden" onClick={()=>setMobile(false)}><X className="h-5 w-5"/></button></div>
+      <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5"><span className="sindcoop-brand-mark"><img src={modeloUrl} alt="Identidade visual SindCoop" /></span><div className="min-w-0"><strong className="sindcoop-brand-name">SindCoop</strong><p className="sindcoop-brand-caption">GESTÃO CONDOMINIAL</p></div><button className="ml-auto lg:hidden" onClick={()=>setMobile(false)}><X className="h-5 w-5"/></button></div>
       <div className="border-b p-4"><div className="rounded-xl bg-slate-100 p-3"><p className="text-[11px] uppercase tracking-wide text-slate-500">Condomínio ativo</p><p className="mt-1 truncate font-semibold">{ctx.nome}</p><p className="mt-1 text-xs capitalize text-slate-500">{ctx.role.replace("_"," ")}</p></div></div>
       <nav className="flex-1 overflow-y-auto p-3"><button onClick={()=>navigate({to:"/dashboard"})} className="mb-2 flex w-full items-center gap-3 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white"><LayoutDashboard className="h-4 w-4"/>Dashboard</button>{modules.filter(([key])=>canAccessModule(ctx.role,key)).map(([key,label,Icon])=><Link key={key} to={"/app/"+key} onClick={()=>setMobile(false)} className="sindcoop-nav-item mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"><Icon className="h-4 w-4"/>{label}</Link>)}</nav>
       <div className="border-t p-3"><button onClick={logout} className="sindcoop-nav-item flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-100"><LogOut className="h-4 w-4"/>Sair</button></div>
