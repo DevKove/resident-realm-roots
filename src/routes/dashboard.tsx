@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import { getCondoContext, dashboardStats, signOut, type CondoContext } from "@/lib/sindcoop-data";
 import { supabase } from "@/integrations/supabase/client";
-import { canAccessModule } from "@/lib/sindcoop-permissions";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: async () => {
@@ -194,3 +193,5 @@ function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;

@@ -473,3 +473,5 @@ function ModulePage() {
 }
 
 export { label };
+
+export default ModulePage;

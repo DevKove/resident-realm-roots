@@ -237,7 +237,6 @@ html[data-sindcoop-theme] .bg-red-50 { background-color: color-mix(in srgb, #fee
 html[data-sindcoop-theme] .text-red-700 { color: #b42318 !important; }
 html[data-sindcoop-theme] .bg-emerald-50 { background-color: color-mix(in srgb, #dff7eb 88%, var(--sindcoop-bg)) !important; }
 html[data-sindcoop-theme] .text-emerald-700 { color: #087443 !important; }
-
 html[data-sindcoop-theme] .bg-slate-950:hover { filter: brightness(1.08); }
 html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-border) !important; }
 
@@ -290,7 +289,7 @@ html[data-sindcoop-theme] .ring-slate-200 { --tw-ring-color: var(--sindcoop-bord
 .sindcoop-stat-icon { transition: transform .25s cubic-bezier(.22,1,.36,1); }
 .sindcoop-stat-card:hover .sindcoop-stat-icon { transform: scale(1.08) rotate(-3deg); }
 .sindcoop-skeleton {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 25%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 35%, white) 50%, color-mix(in srgb, var(--s[...]) 75%, white) 75%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 20%, white) 100%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 25%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 35%, white) 50%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 75%, white) 75%, color-mix(in srgb, var(--sindcoop-soft, #e7f1f4) 20%, white) 100%);
   background-size: 700px 100%;
   animation: sindcoop-shimmer 1.4s infinite linear;
 }
