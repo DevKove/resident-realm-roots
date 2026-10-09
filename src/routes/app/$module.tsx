@@ -40,23 +40,23 @@ type ModuleDefinition = {
 };
 
 const definitions: Record<string, ModuleDefinition> = {
-  condominio: { title: "Meu Condomínio", table: "condominios", fields: [], columns: ["nome", "cidade", "estado", "email"] },
-  unidades: { title: "Unidades", table: "unidades", fields: ["numero", "bloco", "andar", "tipo", "status"], columns: ["numero", "bloco", "andar", "status"] },
-  "areas-comuns": { title: "Áreas comuns", table: "areas_comuns", fields: ["nome", "descricao", "capacidade", "regras", "taxa"], columns: ["nome", "capacidade", "taxa", "ativo"] },
-  moradores: { title: "Moradores", table: "moradores", fields: ["nome", "cpf", "email", "telefone", "tipo", "status"], columns: ["nome", "email", "telefone", "tipo", "status"] },
-  funcionarios: { title: "Funcionários", table: "funcionarios", fields: ["nome", "cpf", "funcao", "telefone", "email", "status"], columns: ["nome", "funcao", "telefone", "status"] },
-  veiculos: { title: "Veículos", table: "veiculos", fields: ["placa", "marca_modelo", "cor", "tipo", "vaga"], columns: ["placa", "marca_modelo", "cor", "tipo", "vaga"] },
-  animais: { title: "Animais", table: "animais", fields: ["nome", "especie", "raca", "porte"], columns: ["nome", "especie", "raca", "porte"] },
-  avisos: { title: "Avisos", table: "avisos", fields: ["titulo", "conteudo", "prioridade"], columns: ["titulo", "prioridade", "publicado_em"] },
+  condominio: { title: "Meu Condomínio", table: "condominios", fields: ["nome", "cnpj", "endereco", "numero", "complemento", "bairro", "cep", "cidade", "estado", "telefone", "email", "quantidade_unidades", "blocos", "descricao"], columns: ["nome", "cnpj", "cidade", "estado", "email"] },
+  unidades: { title: "Unidades", table: "unidades", fields: ["numero", "bloco", "andar", "tipo", "area", "fracao_ideal", "status", "observacoes"], columns: ["numero", "bloco", "andar", "tipo", "status"] },
+  "areas-comuns": { title: "Áreas comuns", table: "areas_comuns", fields: ["nome", "descricao", "capacidade", "regras", "hora_inicio", "hora_fim", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias", "taxa", "ativo"], columns: ["nome", "capacidade", "taxa", "hora_inicio", "hora_fim", "ativo"] },
+  moradores: { title: "Moradores", table: "moradores", fields: ["nome", "cpf", "email", "telefone", "data_nascimento", "tipo", "status"], columns: ["nome", "email", "telefone", "tipo", "status"] },
+  funcionarios: { title: "Funcionários", table: "funcionarios", fields: ["nome", "cpf", "funcao", "telefone", "email", "data_admissao", "status", "observacoes"], columns: ["nome", "funcao", "telefone", "email", "status"] },
+  veiculos: { title: "Veículos", table: "veiculos", fields: ["placa", "marca_modelo", "cor", "tipo", "vaga", "observacoes"], columns: ["placa", "marca_modelo", "cor", "tipo", "vaga"] },
+  animais: { title: "Animais", table: "animais", fields: ["nome", "especie", "raca", "porte", "observacoes"], columns: ["nome", "especie", "raca", "porte"] },
+  avisos: { title: "Avisos", table: "avisos", fields: ["titulo", "conteudo", "prioridade", "fixado"], columns: ["titulo", "prioridade", "publicado_em", "fixado"] },
   ocorrencias: { title: "Ocorrências", table: "ocorrencias", fields: ["titulo", "descricao", "categoria", "prioridade"], columns: ["titulo", "categoria", "prioridade", "status"] },
   reservas: { title: "Reservas", table: "reservas", fields: ["area_id", "inicio", "fim", "observacoes"], columns: ["inicio", "fim", "status", "observacoes"] },
   portaria: { title: "Portaria", table: "acessos_portaria", fields: ["pessoa", "tipo", "observacoes"], columns: ["pessoa", "tipo", "entrada", "saida"] },
   visitantes: { title: "Visitantes", table: "visitantes", fields: ["nome", "documento", "autorizado", "observacoes"], columns: ["nome", "documento", "autorizado", "entrada", "saida"] },
   entregas: { title: "Entregas", table: "entregas", fields: ["destinatario", "transportadora", "descricao"], columns: ["destinatario", "transportadora", "status", "recebido_em"] },
-  documentos: { title: "Documentos", table: "documentos", fields: [], columns: ["categoria", "titulo", "mime_type", "created_at"] },
-  financeiro: { title: "Financeiro", table: "despesas", fields: ["descricao", "fornecedor", "valor", "vencimento", "status"], columns: ["descricao", "fornecedor", "valor", "vencimento", "status"] },
+  documentos: { title: "Documentos", table: "documentos", fields: ["categoria", "titulo"], columns: ["categoria", "titulo", "mime_type", "tamanho_bytes", "created_at"] },
+  financeiro: { title: "Financeiro", table: "despesas", fields: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status", "observacoes"], columns: ["descricao", "fornecedor", "valor", "vencimento", "pagamento", "status"] },
   relatorios: { title: "Relatórios", table: "auditoria", fields: [], columns: ["acao", "recurso", "tabela", "created_at"] },
-  configuracoes: { title: "Configurações", table: "configuracoes", fields: [], columns: ["updated_at"] },
+  configuracoes: { title: "Configurações", table: "configuracoes", fields: ["regras_reservas", "notificacoes", "financeiro"], columns: ["updated_at"] },
 };
 
 const sideModules = [
@@ -82,6 +82,26 @@ const sideModules = [
 
 const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
+function fieldOptions(module: string, field: string): Array<[string, string]> | null {
+  if (["ativo", "fixado", "autorizado"].includes(field)) return [["true", "Sim"], ["false", "Não"]];
+  if (field === "prioridade") return [["low", "Baixa"], ["medium", "Média"], ["high", "Alta"], ["critical", "Crítica"]];
+  if (field === "status") {
+    if (module === "unidades") return [["occupied", "Ocupada"], ["empty", "Vazia"], ["rented", "Alugada"], ["maintenance", "Em manutenção"]];
+    if (["moradores", "funcionarios"].includes(module)) return [["active", "Ativo"], ["inactive", "Inativo"], ["pending", "Pendente"]];
+    if (module === "ocorrencias") return [["open", "Aberta"], ["analyzing", "Em análise"], ["in_progress", "Em andamento"], ["resolved", "Resolvida"], ["canceled", "Cancelada"]];
+    if (module === "reservas") return [["pending", "Pendente"], ["approved", "Aprovada"], ["rejected", "Recusada"], ["canceled", "Cancelada"]];
+    if (module === "entregas") return [["waiting_pickup", "Aguardando retirada"], ["delivered", "Entregue"], ["returned", "Devolvida"]];
+    if (module === "financeiro") return [["pending", "Pendente"], ["paid", "Pago"], ["overdue", "Vencido"], ["canceled", "Cancelado"]];
+  }
+  if (field === "tipo") {
+    if (module === "moradores") return [["owner", "Proprietário"], ["tenant", "Inquilino"], ["family", "Familiar"], ["other", "Outro"]];
+    if (module === "portaria") return [["visitante", "Visitante"], ["prestador", "Prestador de serviço"], ["funcionario", "Funcionário"], ["morador", "Morador"], ["entrega", "Entrega"]];
+    if (module === "veiculos") return [["carro", "Carro"], ["moto", "Moto"], ["bicicleta", "Bicicleta"], ["outro", "Outro"]];
+  }
+  if (field === "porte") return [["pequeno", "Pequeno"], ["medio", "Médio"], ["grande", "Grande"]];
+  return null;
+}
+
 function ModulePage() {
   const { module } = Route.useParams();
   const navigate = useNavigate();
@@ -96,6 +116,10 @@ function ModulePage() {
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState("");
   const [mobile, setMobile] = useState(false);
 
   const load = async () => {
@@ -142,7 +166,14 @@ function ModulePage() {
 
       const { data, error: loadError } = await request;
       if (loadError) throw loadError;
-      setRows(data ?? []);
+      const loadedRows = data ?? [];
+      setRows(loadedRows);
+      if (def.table === "condominios" && loadedRows[0]?.logo_path) {
+        const { data: signedLogo } = await db.storage.from("condominium-assets").createSignedUrl(loadedRows[0].logo_path, 3600);
+        setLogoUrl(signedLogo?.signedUrl ?? "");
+      } else if (def.table === "condominios") {
+        setLogoUrl("");
+      }
     } catch (loadError) {
       const message = loadError && typeof loadError === "object" && "message" in loadError
         ? String(loadError.message)
@@ -181,7 +212,13 @@ function ModulePage() {
   );
 
   async function save() {
-    if (!ctx || !def.fields.length || !canCreateModule(ctx.role, module)) return;
+    const isCondoProfile = module === "condominio";
+    const isSettings = module === "configuracoes";
+    const isDocuments = module === "documentos";
+    const canManageProfile = ["super_admin", "administrador", "sindico"].includes(ctx?.role ?? "");
+    const canManageSettings = ["super_admin", "administrador"].includes(ctx?.role ?? "");
+    const canManageDocuments = ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx?.role ?? "");
+    if (!ctx || (!def.fields.length && !isCondoProfile) || (isCondoProfile ? !canManageProfile : isSettings ? !canManageSettings : isDocuments ? !canManageDocuments : !canCreateModule(ctx.role, module))) return;
     if (module === "reservas" && areas.length === 0) {
       setError("Cadastre uma área comum antes de solicitar uma reserva.");
       return;
@@ -196,38 +233,82 @@ function ModulePage() {
       const userId = userData.user?.id;
       if (!userId) throw new Error("Sessão expirada. Entre novamente.");
 
-      const payload: Record<string, any> = { condominio_id: ctx.id };
+      const payload: Record<string, any> = isCondoProfile ? {} : { condominio_id: ctx.id };
       for (const field of def.fields) {
-        const value = form[field]?.trim();
-        if (!value) continue;
-        payload[field] = field === "inicio" || field === "fim" ? new Date(value).toISOString() : value;
+        const rawValue = form[field];
+        if (rawValue === undefined || rawValue.trim() === "") continue;
+        if (["inicio", "fim"].includes(field)) payload[field] = new Date(rawValue).toISOString();
+        else if (["quantidade_unidades", "blocos", "capacidade", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field)) payload[field] = Number(rawValue);
+        else if (["area", "fracao_ideal", "taxa", "valor"].includes(field)) payload[field] = Number(rawValue);
+        else if (["ativo", "fixado", "autorizado"].includes(field)) payload[field] = rawValue === "true";
+        else if (isSettings && ["regras_reservas", "notificacoes", "financeiro"].includes(field)) {
+          try { payload[field] = JSON.parse(rawValue); }
+          catch { throw new Error("O campo " + label(field) + " precisa conter um JSON válido."); }
+        } else payload[field] = rawValue.trim();
       }
 
+      if (isCondoProfile && logoFile) {
+        const safeName = logoFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+        const storagePath = ctx.id + "/logo-" + Date.now() + "-" + safeName;
+        const { error: uploadError } = await db.storage.from("condominium-assets").upload(storagePath, logoFile, { upsert: true, contentType: logoFile.type });
+        if (uploadError) throw uploadError;
+        payload.logo_path = storagePath;
+      }
+
+      if (isDocuments) {
+        if (!editingId && !documentFile) throw new Error("Selecione um arquivo para anexar ao documento.");
+        if (documentFile) {
+          const safeName = documentFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+          const storagePath = ctx.id + "/documentos/" + Date.now() + "-" + safeName;
+          const { error: uploadError } = await db.storage.from("documents").upload(storagePath, documentFile, { upsert: false, contentType: documentFile.type || "application/octet-stream" });
+          if (uploadError) throw uploadError;
+          payload.storage_path = storagePath;
+          payload.mime_type = documentFile.type || "application/octet-stream";
+          payload.tamanho_bytes = documentFile.size;
+        }
+        payload.autor_id = userId;
+      }
       if (def.table === "avisos") {
         payload.autor_id = userId;
         payload.conteudo = payload.conteudo || payload.titulo || "";
       }
       if (def.table === "ocorrencias") {
-        payload.autor_id = userId;
-        payload.status = "open";
+        if (!editingId) {
+          payload.autor_id = userId;
+          payload.status = "open";
+        }
       }
-      if (def.table === "reservas") {
+      if (def.table === "reservas" && !editingId) {
         payload.solicitante_id = userId;
         payload.status = "pending";
       }
-      if (def.table === "acessos_portaria") {
+      if (def.table === "acessos_portaria" && !editingId) {
         payload.operador_id = userId;
         payload.entrada = new Date().toISOString();
       }
-      if (def.table === "entregas") {
+      if (def.table === "entregas" && !editingId) {
         payload.responsavel_id = userId;
         payload.recebido_em = new Date().toISOString();
         payload.status = "waiting_pickup";
       }
 
-      const { error: saveError } = await db.from(def.table).insert(payload);
-      if (saveError) throw saveError;
+      if (isCondoProfile) {
+        const { error: saveError } = await db.from("condominios").update(payload).eq("id", ctx.id);
+        if (saveError) throw saveError;
+      } else if (isSettings) {
+        const { error: saveError } = await db.from("configuracoes").upsert({ condominio_id: ctx.id, ...payload }, { onConflict: "condominio_id" });
+        if (saveError) throw saveError;
+      } else if (editingId) {
+        const { error: saveError } = await db.from(def.table).update(payload).eq("id", editingId).eq("condominio_id", ctx.id);
+        if (saveError) throw saveError;
+      } else {
+        const { error: saveError } = await db.from(def.table).insert(payload);
+        if (saveError) throw saveError;
+      }
       setForm({});
+      setEditingId(null);
+      setLogoFile(null);
+      setDocumentFile(null);
       setOpen(false);
       await load();
     } catch (saveError) {
@@ -326,13 +407,19 @@ function ModulePage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {ctx && canCreateModule(ctx.role, module) && def.fields.length > 0 && (
+              {ctx && (module === "condominio" ? ["super_admin", "administrador", "sindico"].includes(ctx.role) : module === "configuracoes" ? ["super_admin", "administrador"].includes(ctx.role) : module === "documentos" ? ["super_admin", "administrador", "sindico", "funcionario"].includes(ctx.role) : canCreateModule(ctx.role, module)) && (def.fields.length > 0 || module === "condominio") && (
                 <button
-                  onClick={() => setOpen(true)}
+                  onClick={() => {
+                    setEditingId(null);
+                    setLogoFile(null);
+                    setDocumentFile(null);
+                    setForm(module === "condominio" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, rows[0][field] == null ? "" : String(rows[0][field])])) : module === "configuracoes" && rows[0] ? Object.fromEntries(def.fields.map((field) => [field, JSON.stringify(rows[0][field] ?? {}, null, 2)])) : {});
+                    setOpen(true);
+                  }}
                   className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white sm:px-4"
                 >
                   <Plus className="h-4 w-4" />
-                  Novo
+                  {module === "condominio" ? "Editar cadastro" : module === "configuracoes" ? "Editar preferências" : "Novo registro"}
                 </button>
               )}
               <button
@@ -364,6 +451,38 @@ function ModulePage() {
             </div>
           )}
 
+          {module === "condominio" && rows[0] && (
+            <section className="mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
+              <div className="bg-gradient-to-r from-slate-950 to-slate-700 p-6 text-white sm:p-8">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10">
+                    {logoUrl ? <img src={logoUrl} alt="Logotipo do condomínio" className="h-full w-full object-cover" /> : <Building2 className="h-10 w-10 text-white/80" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Perfil do condomínio</p>
+                    <h2 className="mt-2 text-2xl font-bold">{rows[0].nome}</h2>
+                    <p className="mt-1 text-sm text-slate-300">{[rows[0].endereco, rows[0].numero, rows[0].bairro, rows[0].cidade, rows[0].estado].filter(Boolean).join(", ") || "Endereço ainda não informado"}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/10 px-4 py-3"><p className="text-xs text-slate-300">Unidades</p><p className="mt-1 text-2xl font-bold">{rows[0].quantidade_unidades ?? 0}</p></div>
+                </div>
+              </div>
+              <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                {[["CNPJ", rows[0].cnpj], ["Telefone", rows[0].telefone], ["E-mail", rows[0].email], ["CEP", rows[0].cep], ["Blocos", rows[0].blocos], ["Complemento", rows[0].complemento], ["Descrição", rows[0].descricao]].map(([title, value]) => (
+                  <div key={title} className="border-b p-5 sm:border-r"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</p><p className="mt-2 break-words text-sm font-medium text-slate-800">{value || "Não informado"}</p></div>
+                ))}
+              </div>
+            </section>
+          )}
+          {module !== "condominio" && !busy && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                { label: "Registros totais", value: rows.length },
+                { label: "Resultados da busca", value: filtered.length },
+                { label: "Ativos / em andamento", value: rows.filter((row) => ["active", "open", "analyzing", "in_progress", "pending", "waiting_pickup", "approved"].includes(String(row.status ?? "").toLowerCase())).length },
+                { label: "Último registro", value: rows[0]?.updated_at ? new Date(rows[0].updated_at).toLocaleDateString("pt-BR") : rows[0]?.created_at ? new Date(rows[0].created_at).toLocaleDateString("pt-BR") : "—" },
+              ].map((item) => <div key={item.label} className="rounded-2xl border bg-white p-4 shadow-sm"><p className="text-xs font-medium text-slate-500">{item.label}</p><p className="mt-2 text-2xl font-bold text-slate-900">{item.value}</p></div>)}
+            </div>
+          )}
           <section className="sindcoop-fade-in mt-5 overflow-hidden rounded-2xl border bg-white shadow-sm">
             <div className="overflow-x-auto">
               {busy ? (
@@ -384,7 +503,7 @@ function ModulePage() {
                       {def.columns.map((column) => (
                         <th key={column} className="px-4 py-3 font-semibold">{label(column)}</th>
                       ))}
-                      {ctx && canDeleteModule(ctx.role, module) && <th className="px-4 py-3" aria-label="Ações" />}
+                      {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && <th className="px-4 py-3 text-right" aria-label="Ações">Ações</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -395,11 +514,10 @@ function ModulePage() {
                             {typeof row[column] === "boolean" ? (row[column] ? "Sim" : "Não") : row[column] ?? "—"}
                           </td>
                         ))}
-                        {ctx && canDeleteModule(ctx.role, module) && (
-                          <td className="px-4 py-3 text-right">
-                            <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">
-                              Excluir
-                            </button>
+                        {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && (
+                          <td className="space-x-3 whitespace-nowrap px-4 py-3 text-right">
+                            {canCreateModule(ctx.role, module) && def.fields.length > 0 && <button onClick={() => { setEditingId(row.id); setForm(Object.fromEntries(def.fields.map((field) => [field, row[field] == null ? "" : String(row[field])]))); setOpen(true); }} className="text-xs font-semibold text-slate-700 hover:underline">Editar</button>}
+                            {canDeleteModule(ctx.role, module) && <button onClick={() => void remove(row.id)} className="text-xs font-semibold text-red-600 hover:underline">Excluir</button>}
                           </td>
                         )}
                       </tr>
@@ -416,21 +534,24 @@ function ModulePage() {
                 onSubmit={(event) => { event.preventDefault(); void save(); }}
                 className="sindcoop-modal-enter w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
               >
-                <h2 className="text-xl font-bold">Novo registro — {def.title}</h2>
+                <h2 className="text-xl font-bold">{module === "condominio" ? "Editar cadastro do condomínio" : editingId ? `Editar registro — ${def.title}` : `Novo registro — ${def.title}`}</h2>
+                {module === "condominio" && <p className="mt-2 text-sm text-slate-500">Atualize os dados cadastrais, contatos e a identificação visual do condomínio.</p>}
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   {def.fields.map((field) => (
                     <label key={field} className="grid gap-2 text-sm font-medium">
                       {label(field)}
                       {field === "area_id" ? (
-                        <select
-                          required
-                          value={form[field] ?? ""}
-                          onChange={(event) => setForm({ ...form, [field]: event.target.value })}
-                          className="rounded-xl border px-3 py-2.5"
-                        >
+                        <select required value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5">
                           <option value="">Selecione uma área comum</option>
                           {areas.map((area) => <option key={area.id} value={area.id}>{area.nome}</option>)}
                         </select>
+                      ) : fieldOptions(module, field) ? (
+                        <select value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5">
+                          <option value="">Selecione...</option>
+                          {fieldOptions(module, field)!.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
+                        </select>
+                      ) : ["conteudo", "descricao", "observacoes", "regras", "regras_reservas", "notificacoes", "financeiro"].includes(field) ? (
+                        <textarea rows={["regras_reservas", "notificacoes", "financeiro"].includes(field) ? 7 : 3} value={form[field] ?? ""} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="rounded-xl border px-3 py-2.5 outline-none focus:ring-2 focus:ring-slate-200" />
                       ) : (
                         <input
                           required={[
@@ -447,7 +568,7 @@ function ModulePage() {
                             "fim",
                             "valor",
                           ].includes(field)}
-                          type={field === "inicio" || field === "fim" ? "datetime-local" : ["valor", "taxa", "capacidade"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
+                          type={field === "inicio" || field === "fim" ? "datetime-local" : ["data_nascimento", "data_admissao", "vencimento", "pagamento"].includes(field) ? "date" : ["valor", "taxa", "capacidade", "area", "fracao_ideal", "quantidade_unidades", "blocos", "intervalo_minutos", "antecedencia_minutos", "antecedencia_maxima_dias"].includes(field) ? "number" : field.includes("email") ? "email" : "text"}
                           step={field === "capacidade" ? "1" : ["valor", "taxa"].includes(field) ? "0.01" : undefined}
                           value={form[field] ?? ""}
                           onChange={(event) => setForm({ ...form, [field]: event.target.value })}
@@ -457,6 +578,22 @@ function ModulePage() {
                     </label>
                   ))}
                 </div>
+                {module === "configuracoes" && <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">Edite as regras de reservas, notificações e parâmetros financeiros em JSON válido. Exemplo: {"{\"ativado\": true}"}.</p>}
+                {module === "documentos" && (
+                  <div className="mt-4 grid gap-2 text-sm font-medium">
+                    Arquivo para anexar
+                    <input type="file" onChange={(event) => setDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <span className="text-xs font-normal text-slate-500">O arquivo será armazenado de forma privada e vinculado ao condomínio ativo.</span>
+                  </div>
+                )}
+                {module === "condominio" && (
+                  <div className="mt-4 grid gap-2 text-sm font-medium">
+                    Logotipo / foto do condomínio
+                    {logoUrl && <img src={logoUrl} alt="Prévia do logotipo atual" className="h-24 w-24 rounded-xl border object-cover" />}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(event) => setLogoFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <span className="text-xs font-normal text-slate-500">Formatos: PNG, JPG, WEBP ou SVG. O arquivo será armazenado no espaço privado do condomínio.</span>
+                  </div>
+                )}
                 {module === "reservas" && areas.length === 0 && (
                   <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
                     Nenhuma área comum cadastrada. Cadastre uma área antes de criar reservas.
@@ -467,7 +604,7 @@ function ModulePage() {
                     Cancelar
                   </button>
                   <button disabled={saving} className="rounded-xl bg-slate-950 px-4 py-2.5 font-semibold text-white disabled:opacity-60">
-                    {saving ? "Salvando…" : "Salvar"}
+                    {saving ? "Salvando…" : module === "condominio" || module === "configuracoes" || editingId ? "Salvar alterações" : "Salvar registro"}
                   </button>
                 </div>
               </form>
