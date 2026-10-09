@@ -217,7 +217,12 @@ function ModulePage() {
   );
 
   async function editRow(row: any) {
-    if (!ctx || !def.fields.length || !canCreateModule(ctx.role, module)) return;
+    const canEditModule = module === "condominio"
+      ? ["super_admin", "administrador", "sindico"].includes(ctx?.role ?? "")
+      : module === "configuracoes"
+        ? ["super_admin", "administrador"].includes(ctx?.role ?? "")
+        : canCreateModule(ctx?.role ?? "", module);
+    if (!ctx || !def.fields.length || !canEditModule) return;
     setError("");
     try {
       const db = supabase as any;
