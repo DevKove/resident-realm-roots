@@ -268,12 +268,12 @@ function ModulePage() {
         <div className="border-b p-4">
           <div className="rounded-xl bg-slate-100 p-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-500">Condomínio ativo</p>
-            <p className="mt-1 truncate text-sm font-semibold text-slate-900">{ctx?.name ?? "Carregando..."}</p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-900">{ctx?.nome ?? "Carregando..."}</p>
           </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3">
-          {sideModules.map(([key, labelText, Icon]) => {
+          {sideModules.filter(([key]) => key === "dashboard" || (ctx ? canAccessModule(ctx.role, key) : false)).map(([key, labelText, Icon]) => {
             const isActive = key === activeSidebar;
             const destination = key === "dashboard" ? "/dashboard" : `/app/${key}`;
 
@@ -318,11 +318,11 @@ function ModulePage() {
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="flex items-center gap-2">
               {ctx && canCreateModule(ctx.role, module) && def.fields.length > 0 && (
                 <button
                   onClick={() => setOpen(true)}
-                  className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white"
+                  className="sindcoop-icon-button inline-flex items-center gap-2 rounded-xl bg-slate-950 px-3 py-2.5 text-sm font-semibold text-white sm:px-4"
                 >
                   <Plus className="h-4 w-4" />
                   Novo
