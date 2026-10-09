@@ -1,27 +1,11 @@
--- Remove unnecessary anonymous API privileges from the profile table.
--- RLS remains the row-level boundary; this also removes broad column grants
--- that should never be available to the anon database role.
+-- Remove all direct access grants from anonymous clients to profiles.
+-- Authenticated profile access remains governed by existing grants and RLS.
 revoke all privileges on table public.profiles from anon;
-
-do $$
-declare
-  v_column record;
-  v_privilege text;
-begin
-  for v_column in
-    select column_name
-    from information_schema.columns
-    where table_schema = 'public'
-      and table_name = 'profiles'
-  loop
-    foreach v_privilege in array array['SELECT', 'INSERT', 'UPDATE', 'REFERENCES']
-    loop
-      execute format(
-        'revoke %s (%I) on table public.profiles from anon',
-        v_privilege,
-        v_column.column_name
-      );
-    end loop;
-  end loop;
-end
-$$;
+revoke select (id, full_name, cpf, phone, avatar_path, role, is_platform_admin, created_at, updated_at)
+  on table public.profiles from anon;
+revoke insert (id, full_name, cpf, phone, avatar_path, role, is_platform_admin, created_at, updated_at)
+  on table public.profiles from anon;
+revoke update (id, full_name, cpf, phone, avatar_path, role, is_platform_admin, created_at, updated_at)
+  on table public.profiles from anon;
+revoke references (id, full_name, cpf, phone, avatar_path, role, is_platform_admin, created_at, updated_at)
+  on table public.profiles from anon;
