@@ -14,7 +14,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const modules = [
-  ["condominio","Meu Condomínio",Building2],["unidades","Unidades",Home],["moradores","Moradores",Users],["funcionarios","Funcionários",BriefcaseBusiness],
+  ["condominio","Meu Condomínio",Building2],["unidades","Unidades",Home],["areas-comuns","Áreas comuns",CalendarDays],["moradores","Moradores",Users],["funcionarios","Funcionários",BriefcaseBusiness],
   ["veiculos","Veículos",Car],["animais","Animais",PawPrint],["avisos","Avisos",Bell],["ocorrencias","Ocorrências",AlertTriangle],
   ["reservas","Reservas",CalendarDays],["portaria","Portaria",ShieldCheck],["visitantes","Visitantes",UserRound],["entregas","Entregas",Package],
   ["documentos","Documentos",FileText],["financeiro","Financeiro",WalletCards],["relatorios","Relatórios",ClipboardList],["configuracoes","Configurações",Settings],
