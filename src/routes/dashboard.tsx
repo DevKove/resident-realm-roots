@@ -136,11 +136,24 @@ function Dashboard() {
               <h1 className="text-xl font-bold text-slate-900">Visão geral</h1>
             </div>
             <div className="flex items-center gap-2">
-              <button className="sindcoop-icon-button rounded-xl border bg-white p-2.5" aria-label="Notificações"><Bell className="h-4 w-4" /></button>
-              <div className="flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-medium text-slate-700">
-                <Building2 className="h-4 w-4" />
+              <button
+                type="button"
+                onClick={() => void navigate({ to: "/app/avisos" })}
+                className="sindcoop-icon-button rounded-xl border bg-white p-2.5 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                aria-label="Abrir avisos e notificações"
+                title="Avisos e notificações"
+              >
+                <Bell className="h-4 w-4" />
+              </button>
+              <Link
+                to="/app/condominio"
+                className="flex max-w-56 items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                aria-label={`Abrir dados do condomínio: ${ctx.name}`}
+                title="Ver dados do condomínio"
+              >
+                <Building2 className="h-4 w-4 shrink-0" />
                 <span className="truncate max-w-40">{ctx.name}</span>
-              </div>
+              </Link>
             </div>
           </div>
         </header>
