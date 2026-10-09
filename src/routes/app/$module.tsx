@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import modeloUrl from "../../IMG/modelo.png?url";
+import modeloUrl from "../../../IMG/modelo.png?url";
 import {
   AlertTriangle,
   ArrowLeft,
