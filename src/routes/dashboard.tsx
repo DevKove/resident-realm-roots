@@ -21,7 +21,6 @@ import {
   UserRound,
   Users,
   WalletCards,
-  X,
 } from "lucide-react";
 import { getCondoContext, dashboardStats, signOut, type CondoContext } from "@/lib/sindcoop-data";
 import { supabase } from "@/integrations/supabase/client";
@@ -87,10 +86,10 @@ function Dashboard() {
   if (!ctx) return <main className="min-h-screen grid place-items-center bg-slate-50 p-6"><section className="max-w-md rounded-3xl border bg-white p-8 text-center shadow-sm"><Building2 className="mx-auto h-10 w-10 text-slate-400" /><h1 className="mt-4 text-xl font-semibold">Nenhum condomínio encontrado</h1><p className="mt-2 text-sm text-slate-500">Entre com uma conta vinculada a um condomínio para continuar.</p></section></main>;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
+    <div className="sindcoop-shell min-h-screen bg-slate-50 text-slate-900 sindcoop-page-enter">
       {mobile && <button aria-label="Fechar menu" onClick={() => setMobile(false)} className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden" />}
 
-      <aside className={"fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-white transition-transform lg:translate-x-0 " + (mobile ? "translate-x-0" : "-translate-x-full")}>
+      <aside className={"sindcoop-sidebar flex w-72 flex-col border-r bg-white " + (mobile ? "is-open" : "")}>
         <div className="sindcoop-brand flex min-h-24 items-center gap-3 border-b px-5">
           <span className="sindcoop-brand-mark"><img src={modeloUrl} alt="Identidade visual SindCoop" /></span>
           <div className="min-w-0">
@@ -126,7 +125,7 @@ function Dashboard() {
         </div>
       </aside>
 
-      <main className="min-h-screen lg:pl-72">
+      <main className="sindcoop-main min-h-screen">
         <header className="sticky top-0 z-20 flex h-20 items-center border-b bg-white/95 px-4 backdrop-blur sm:px-6">
           <button className="sindcoop-icon-button lg:hidden rounded-xl border bg-white p-2.5" onClick={() => setMobile(true)} aria-label="Abrir menu">
             <Menu className="h-4 w-4" />
