@@ -52,5 +52,5 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  return <QueryClientProvider client={queryClient}><SindCoopThemeInitializer /><Outlet /><ThemeSelector /></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><div className="sindcoop-visual-shell"><SindCoopThemeInitializer /><Outlet /><ThemeSelector /></div></QueryClientProvider>;
 }
