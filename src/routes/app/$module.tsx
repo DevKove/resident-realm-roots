@@ -82,6 +82,10 @@ const sideModules = [
   ["configuracoes", "Configurações", Settings],
 ] as const;
 
+const PERSON_DOCUMENT_MODULES = new Set(["moradores", "funcionarios", "visitantes", "portaria"]);
+const PERSON_DOCUMENT_COLUMNS = ["documento_path", "documento_nome", "documento_mime_type", "documento_tamanho_bytes"];
+const hasPersonDocument = (module: string) => PERSON_DOCUMENT_MODULES.has(module);
+
 const label = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
 const FIELD_MAX_LENGTHS: Record<string, number> = {
@@ -149,6 +153,9 @@ function ModulePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [identityDocumentFile, setIdentityDocumentFile] = useState<File | null>(null);
+  const [identityDocumentPath, setIdentityDocumentPath] = useState("");
+  const [identityDocumentName, setIdentityDocumentName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [mobile, setMobile] = useState(false);
 
@@ -187,7 +194,7 @@ function ModulePage() {
 
       const selectedFields = def.table === "condominios"
         ? Array.from(new Set(["id", ...def.columns, "logo_path"]))
-        : Array.from(new Set(["id", "condominio_id", ...def.columns]));
+        : Array.from(new Set(["id", "condominio_id", ...def.columns, ...(hasPersonDocument(module) ? PERSON_DOCUMENT_COLUMNS : [])]));
       let request = db.from(def.table).select(selectedFields.join(","));
       if (def.table === "condominios") {
         request = request.eq("id", ctx.id).limit(1);
@@ -258,6 +265,7 @@ function ModulePage() {
         "id",
         ...(def.table === "condominios" ? [] : ["condominio_id"]),
         ...def.fields,
+        ...(hasPersonDocument(module) ? PERSON_DOCUMENT_COLUMNS : []),
       ]));
       let request = db.from(def.table).select(selectedFields.join(",")).eq("id", row.id);
       if (def.table === "condominios") request = request.eq("id", ctx.id);
@@ -273,6 +281,9 @@ function ModulePage() {
       ])));
       setLogoFile(null);
       setDocumentFile(null);
+      setIdentityDocumentFile(null);
+      setIdentityDocumentPath(data.documento_path ?? "");
+      setIdentityDocumentName(data.documento_nome ?? "");
       setOpen(true);
     } catch {
       setError("Não foi possível carregar os dados para edição.");
@@ -294,6 +305,8 @@ function ModulePage() {
 
     setSaving(true);
     setError("");
+    let uploadedIdentityPath = "";
+    const previousIdentityPath = identityDocumentPath;
     try {
       const db = supabase as any;
       const { data: userData, error: userError } = await db.auth.getUser();
@@ -313,6 +326,22 @@ function ModulePage() {
           try { payload[field] = JSON.parse(rawValue); }
           catch { throw new Error("O campo " + label(field) + " precisa conter um JSON válido."); }
         } else payload[field] = rawValue.trim();
+      }
+
+      const isPersonDocument = hasPersonDocument(module);
+      if (isPersonDocument && identityDocumentFile) {
+        const validationError = validateDocumentUpload(identityDocumentFile);
+        if (validationError) throw new Error(validationError);
+        const recordId = editingId ?? crypto.randomUUID();
+        if (!editingId) payload.id = recordId;
+        const safeName = identityDocumentFile.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "-").slice(-160);
+        uploadedIdentityPath = ctx.id + "/identity-documents/" + module + "/" + recordId + "-" + Date.now() + "-" + safeName;
+        const { error: uploadError } = await db.storage.from("identity-documents").upload(uploadedIdentityPath, identityDocumentFile, { upsert: false, contentType: identityDocumentFile.type });
+        if (uploadError) throw uploadError;
+        payload.documento_path = uploadedIdentityPath;
+        payload.documento_nome = identityDocumentFile.name.slice(0, 255);
+        payload.documento_mime_type = identityDocumentFile.type || "application/octet-stream";
+        payload.documento_tamanho_bytes = identityDocumentFile.size;
       }
 
       if (isCondoProfile && logoFile) {
@@ -382,12 +411,32 @@ function ModulePage() {
       setEditingId(null);
       setLogoFile(null);
       setDocumentFile(null);
+      setIdentityDocumentFile(null);
+      setIdentityDocumentPath("");
+      setIdentityDocumentName("");
       setOpen(false);
+      if (uploadedIdentityPath && previousIdentityPath && previousIdentityPath !== uploadedIdentityPath) {
+        await db.storage.from("identity-documents").remove([previousIdentityPath]).catch(() => undefined);
+      }
       await load();
     } catch (saveError) {
+      if (uploadedIdentityPath) await (supabase as any).storage.from("identity-documents").remove([uploadedIdentityPath]).catch(() => undefined);
       setError(saveError instanceof Error ? saveError.message : "Não foi possível salvar o registro.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function viewIdentityDocument(path: string) {
+    try {
+      const { data, error: signedUrlError } = await (supabase as any).storage
+        .from("identity-documents")
+        .createSignedUrl(path, 60);
+      if (signedUrlError) throw signedUrlError;
+      if (!data?.signedUrl) throw new Error("Não foi possível gerar o link seguro do documento.");
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      setError("Não foi possível abrir o documento. Verifique sua permissão de acesso.");
     }
   }
 
@@ -490,6 +539,9 @@ function ModulePage() {
                     setEditingId(null);
                     setLogoFile(null);
                     setDocumentFile(null);
+                    setIdentityDocumentFile(null);
+                    setIdentityDocumentPath("");
+                    setIdentityDocumentName("");
                     setForm({});
                     setOpen(true);
                   }}
@@ -580,6 +632,7 @@ function ModulePage() {
                       {def.columns.map((column) => (
                         <th key={column} className="px-4 py-3 font-semibold">{label(column)}</th>
                       ))}
+                      {hasPersonDocument(module) && <th className="px-4 py-3 font-semibold">Documento de identificação</th>}
                       {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && <th className="px-4 py-3 text-right" aria-label="Ações">Ações</th>}
                     </tr>
                   </thead>
@@ -591,6 +644,15 @@ function ModulePage() {
                             {typeof row[column] === "boolean" ? (row[column] ? "Sim" : "Não") : row[column] ?? "—"}
                           </td>
                         ))}
+                        {hasPersonDocument(module) && (
+                          <td className="px-4 py-3">
+                            {row.documento_path ? (
+                              <button type="button" onClick={() => void viewIdentityDocument(row.documento_path)} className="font-semibold text-teal-700 hover:underline">
+                                {row.documento_nome || "Visualizar documento"}
+                              </button>
+                            ) : <span className="text-slate-400">Não anexado</span>}
+                          </td>
+                        )}
                         {ctx && (canDeleteModule(ctx.role, module) || canCreateModule(ctx.role, module)) && (
                           <td className="space-x-3 whitespace-nowrap px-4 py-3 text-right">
                             {canCreateModule(ctx.role, module) && def.fields.length > 0 && <button onClick={() => void editRow(row)} className="text-xs font-semibold text-slate-700 hover:underline">Editar</button>}
@@ -669,6 +731,20 @@ function ModulePage() {
                   ))}
                 </div>
                 {module === "configuracoes" && <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">Edite as regras de reservas, notificações e parâmetros financeiros em JSON válido. Exemplo: {"{\"ativado\": true}"}.</p>}
+                {hasPersonDocument(module) && (
+                  <div className="mt-4 grid gap-2 text-sm font-medium sm:col-span-2">
+                    Documento de identificação com foto
+                    {identityDocumentName && (
+                      <p className="rounded-lg bg-slate-50 p-3 text-xs font-normal text-slate-600">
+                        Documento atual: {identityDocumentName}. Selecione outro arquivo somente se desejar substituí-lo.
+                      </p>
+                    )}
+                    <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp" onChange={(event) => setIdentityDocumentFile(event.target.files?.[0] ?? null)} className="rounded-xl border p-3" />
+                    <span className="text-xs font-normal text-slate-500">
+                      PDF, JPG, JPEG, PNG ou WEBP; máximo de 20 MiB. O documento fica em armazenamento privado e só pode ser acessado por usuários autorizados do condomínio. Opcional para manter compatibilidade com registros antigos.
+                    </span>
+                  </div>
+                )}
                 {module === "documentos" && (
                   <div className="mt-4 grid gap-2 text-sm font-medium">
                     Arquivo para anexar
