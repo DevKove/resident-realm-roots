@@ -69,7 +69,7 @@ to authenticated
 using (
   bucket_id = 'identity-documents'
   and split_part(name, '/', 1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-  and public.has_condo_role(
+  and private.has_condo_role(
     (split_part(name, '/', 1))::uuid,
     array['super_admin','administrador','sindico','sub_sindico','porteiro','funcionario']::public.app_role[]
   )
@@ -84,7 +84,7 @@ with check (
   bucket_id = 'identity-documents'
   and split_part(name, '/', 1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
   and octet_length(name) <= 500
-  and public.has_condo_role(
+  and private.has_condo_role(
     (split_part(name, '/', 1))::uuid,
     array['super_admin','administrador','sindico','sub_sindico','porteiro','funcionario']::public.app_role[]
   )
@@ -98,7 +98,7 @@ to authenticated
 using (
   bucket_id = 'identity-documents'
   and split_part(name, '/', 1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-  and public.has_condo_role(
+  and private.has_condo_role(
     (split_part(name, '/', 1))::uuid,
     array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]
   )
@@ -107,7 +107,7 @@ with check (
   bucket_id = 'identity-documents'
   and split_part(name, '/', 1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
   and octet_length(name) <= 500
-  and public.has_condo_role(
+  and private.has_condo_role(
     (split_part(name, '/', 1))::uuid,
     array['super_admin','administrador','sindico','sub_sindico']::public.app_role[]
   )
@@ -121,7 +121,7 @@ to authenticated
 using (
   bucket_id = 'identity-documents'
   and split_part(name, '/', 1) ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-  and public.has_condo_role(
+  and private.has_condo_role(
     (split_part(name, '/', 1))::uuid,
     array['super_admin','administrador','sindico']::public.app_role[]
   )
