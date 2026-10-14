@@ -197,10 +197,10 @@ function Dashboard() {
               <button type="button" onClick={() => void refreshDashboard()} disabled={refreshing} className="sindcoop-icon-button rounded-xl border bg-white p-2.5 transition hover:bg-slate-50 disabled:opacity-60" aria-label="Atualizar indicadores" title="Atualizar indicadores">
                 <RefreshCw className={`h-4 w-4 ${refreshing ? "sindcoop-spin" : ""}`} />
               </button>
-              <Link to="/app/avisos" className="sindcoop-icon-button rounded-xl border bg-white p-2.5 transition hover:bg-slate-50" aria-label="Abrir avisos" title="Avisos">
+              <Link to="/app/$module" params={{ module: "avisos" }} className="sindcoop-icon-button rounded-xl border bg-white p-2.5 transition hover:bg-slate-50" aria-label="Abrir avisos" title="Avisos">
                 <Bell className="h-4 w-4" />
               </Link>
-              <Link to="/app/condominio" className="hidden max-w-56 items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex" aria-label={`Abrir dados do condomínio: ${ctx.nome}`} title="Ver dados do condomínio">
+              <Link to="/app/$module" params={{ module: "condominio" }} className="hidden max-w-56 items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 sm:flex" aria-label={`Abrir dados do condomínio: ${ctx.nome}`} title="Ver dados do condomínio">
                 <Building2 className="h-4 w-4 shrink-0" />
                 <span className="max-w-40 truncate">{ctx.nome}</span>
               </Link>
@@ -238,7 +238,7 @@ function Dashboard() {
             </div>
             <div className="sindcoop-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {metricCards.map(({ label, value, Icon, module, hint }) => (
-                <Link key={label} to={`/app/${module}`} className="sindcoop-stat-card group rounded-2xl border bg-white p-5 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+                <Link key={label} to="/app/$module" params={{ module }} className="sindcoop-stat-card group rounded-2xl border bg-white p-5 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
                   <div className="sindcoop-stat-topline">
                     <span className="sindcoop-stat-icon inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-slate-100"><Icon className="h-4 w-4" /></span>
                     <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-slate-600" />
@@ -266,7 +266,7 @@ function Dashboard() {
             {filteredModules.length ? (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {filteredModules.map(([key, title, Icon, description]) => (
-                  <Link key={key} to={`/app/${key}`} className="sindcoop-action-card group flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
+                  <Link key={key} to="/app/$module" params={{ module: key }} className="sindcoop-action-card group flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
                     <span className="sindcoop-action-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><Icon className="h-5 w-5" /></span>
                     <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-slate-900">{title}</span><span className="mt-1 block text-xs text-slate-500">{description}</span></span>
                     <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-300 transition group-hover:text-slate-700" />
